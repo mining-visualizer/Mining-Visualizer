@@ -1,0 +1,91 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Miners</title>
+
+<link rel="stylesheet" href="mvis.css" type="text/css">
+
+<style type="text/css">
+
+.MinersGPUsStyle {
+	color: rgb(255,255,96);
+}
+.GPUTempsStyle {
+	color: rgb(255,255,96);
+}
+.HashRateStyle {
+	color: rgb(255,255,96);
+}
+.HashFaultsStyle {
+	color: red;
+	font-weight: bold;
+}
+
+</style>
+
+<script src="common.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+	function PageLoad() 
+	{
+		heartBeatMs = readDateVar("HeartBeat_Miners");
+		setInterval(timerTick, 1000);
+	}
+
+	function timerTick() 
+	{
+		checkHeartBeat();
+	}
+
+</script>
+
+</head>
+
+<body onload="PageLoad()">
+
+	<!-- if HeartBeat_Miners is updated regularly with the current date/time, we'll displaying data, otherwise we'll display
+	     the 'offline' message.  see common.js/checkHeartBeat -->
+	<span id="HeartBeat_Miners" style="display: none;"> __HeartBeat_Miners__ </span>
+	
+	<h1>MINERS</h1>
+	<section id="WidgetBody">
+		<div class="Labels">
+			<p class="__MinersGPUsStyle__">Miners/GPUs</p>
+			<p class="__HashRateStyle__">Hash Rates</p>
+			<p class="__GPUTempsStyle__">GPU Temps</p>
+			<p class="__HashFaultsStyle__">Hash Faults</p>
+		</div>
+	  
+		<div class="Values">
+			<p class="__MinersGPUsStyle__">&nbsp; __MinersGPUs__ </p>
+			<p class="__HashRateStyle__">&nbsp; __HashRates__ </p>
+			<p class="__GPUTempsStyle__">&nbsp; __GPUTemps__ </p>
+			<p class="__HashFaultsStyle__">&nbsp; __HashFaults__ </p>
+		</div>
+	</section>
+
+	<section id="Offline" style="display: none;">
+		<p>Data collector is offline</p>
+	</section>
+
+</body>
+</html>

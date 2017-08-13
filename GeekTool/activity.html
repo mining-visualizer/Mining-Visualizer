@@ -1,0 +1,72 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Mining Activity</title>
+
+<link rel="stylesheet" href="mvis.css" type="text/css">
+
+<script src="common.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+	function PageLoad() 
+	{
+		heartBeatMs = readDateVar("HeartBeat_Activity");
+		setInterval(timerTick, 1000);
+	}
+
+	function timerTick() 
+	{
+		checkHeartBeat();
+	}
+
+</script>
+
+</head>
+
+<body onload="PageLoad()">
+
+	<!-- if HeartBeat_Miners is updated regularly with the current date/time, we'll displaying data, otherwise we'll display
+	     the 'offline' message.  see common.js/checkHeartBeat -->
+	<span id="HeartBeat_Activity" style="display: none;"> __HeartBeat_Activity__ </span>
+	
+	<h1>MINING ACTIVITY</h1>
+	<section id="WidgetBody">
+		<div class="Labels">
+			<p>Last Solution</p>
+			<p>Next Solution (est.)</p>
+			<p>Target</p>
+			<p>Best Hash</p>
+		</div>
+		<div class="Values">
+			<p id="LastSolution">&nbsp; __LastSolution__ </p>
+			<p>&nbsp; __NextSolution__ </p>
+			<p>&nbsp; __Target__ </p>
+			<p title="__BestHashDate__">&nbsp; __BestHash__ </p>
+		</div>
+	</section>
+
+	<section id="Offline" style="display: none;">
+		<p>Data collector is offline</p>
+	</section>
+
+</body>
+</html>

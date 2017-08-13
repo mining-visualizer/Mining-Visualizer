@@ -1,0 +1,413 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Scatter Plot</title>
+
+
+<link href='plugins/metricsgraphics.css' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+<script src="plugins/jquery.js"></script>
+<script src="plugins/d3.min.js"></script>
+<script src="plugins/metricsgraphics.js"></script>
+
+
+<script>
+
+	// pageID should be unique for each browser / browser instance / html page / browser tab.  we send it to the 
+	// server via the X-MVis-PageID header when we are making a long-polling request.
+	var pageID = new Date().getTime();
+	
+	var chartData = [];
+	var safetyTimer;
+	var plotting = false;
+
+	//-----------------------------------------------------------------
+	// DocumentReady
+	//-----------------------------------------------------------------
+	$(document).ready(function() {
+
+		$.getJSON('/ajax/scatter_init', function (data) {
+			$('#target').html('target = ' + data.target.toExponential(4));
+			var cmbMiners = $("#cmbMiners");
+			$.each(data.miners, function() {
+				if (!this.inactive && this.online) {
+				    cmbMiners.append($("<option />").val(this.miner_id).text(this.miner));
+				}
+			});
+		});
+
+		$("#btnStart").click(btnStartClick);
+		$("#btnStop").click(btnStopClick);
+		$("#btnClear").click(clearGraph);
+
+		//longPoll();
+		
+		clearGraph();
+				
+	});	// DocumentReady
+
+
+	//-----------------------------------------------------------------
+	// longPoll
+	//-----------------------------------------------------------------
+	function longPoll() {
+		$.ajax({
+			url: "/poll",
+			method: "POST",
+			headers: {
+				'X-MVis-PageID': pageID, 
+				'Cache-Control' : 'no-cache, no-store, must-revalidate'
+			},
+			timeout: 10000,
+			success: function( result ) {
+				//serverStatus(true);
+			  	try 
+			  	{
+			  		if (result.data_id == 'KeepAlive') {
+						//logText('KeepAlive');
+			  		} else if (result.data_id == 'HashSamples') {
+			  			//logText('hash');
+			  			chartData.push({x: result.sample, y: 0.15});
+			  			drawGraph();
+			  			logHash(result.sample);
+				    	if (result.is_last_sample) {
+							$("#btnStop").click();
+				    	}
+			  		}
+			  	} catch(e) {
+			  		logText(e.message);
+			  	}
+			  	if (plotting) 
+			  		longPoll();
+			},
+			error: function (xhr, status, error) {
+				if (status == 'timeout') {
+					logText('timeout');
+				} else {
+					serverStatus(false);
+					logText('An error occurred communicating with the server. status=' + status);
+				}
+			}
+		});
+	}
+
+
+	//-----------------------------------------------------------------
+	// btnStartClick
+	//-----------------------------------------------------------------
+	function btnStartClick(e) {
+		e.preventDefault();
+		
+		if (plotting) 
+			return;
+		
+		var minerID = Number($("#cmbMiners").val());
+		var gpu = Number($("#txtGPU").val());
+		if (isNaN(gpu)) {
+			showError("Please enter valid numeric values");
+			return;
+		}
+		$.ajax({
+			url: "/stream",
+			method: "GET",
+			data: { streams: 'HashSamples', minerID: minerID, gpu: gpu - 1, rate: 250 },
+			headers: { 'X-MVis-pageID': pageID },
+			success: function( result ) { 
+				serverStatus(true); 
+				plotting = true;
+			},
+			error: function (xhr, status, error) {
+				serverStatus(false);
+				if (xhr.responseJSON) {
+					// assuming the error came from MVis,
+					//   - xhr.responseJSON.message is the 'message' field of the JSON response body
+					//   - status is 'error'
+					//   - error is '400 Bad Request'
+					showError(xhr.responseJSON.message);
+				} else {
+					logText('HTTP error in btnStartClick');
+				}
+				$("#btnStop").click();
+			}
+		});
+		$("#btnStart").prop('disabled', true);
+		$("#btnStop").prop('disabled', false);
+		clearError();
+		longPoll();
+		
+		// set a safety timer in case we don't get the 'is_last_sample' flag
+		safetyTimer = setTimeout(function()  {
+			$("#btnStop").click();
+		}, 17 * 1000);
+	}
+
+	//-----------------------------------------------------------------
+	// btnStopClick
+	//-----------------------------------------------------------------
+	function btnStopClick(e) {
+		e.preventDefault();
+		plotting = false;
+		clearTimeout(safetyTimer);
+		$.ajax({
+			url: "/stream",
+			method: "DELETE",
+			data: { streams: 'HashSamples' },
+			headers: { 'X-MVis-pageID': pageID },
+			success: function( result ) { 
+				serverStatus(true); 
+			},
+		});
+		$("#btnStop").prop('disabled', true);
+		$("#btnStart").prop('disabled', false);
+	}
+
+
+	//-----------------------------------------------------------------
+	// clearGraph
+	//-----------------------------------------------------------------
+	function clearGraph() {
+		chartData.length = 0;
+		// add a data point to force the x-axis to display
+		chartData.push({x: -1, y: 0.15});
+		drawGraph();
+		$('#txtLog').val("");
+	}
+
+
+	//-----------------------------------------------------------------
+	// drawGraph
+	//-----------------------------------------------------------------
+	function drawGraph() {
+		MG.data_graphic({
+		  chart_type: 'point',
+		  data: chartData,
+		  left: 15,
+		  width: 900,
+		  height: 160,
+		  transition_on_update: false,
+		  target: "#chart",
+		  x_accessor: "x",
+		  y_accessor: "y",
+		  min_x: -0.01,
+		  max_x: 1,
+		  min_y: 0.1,
+		  max_y: 0.20,
+		  y_axis: false,
+		  point_size: 7,
+		  x_rug: true,
+		});
+	}
+
+	//-----------------------------------------------------------------
+	// showError
+	//-----------------------------------------------------------------
+	function showError(msg) {
+		$("#alertMsg").html(msg);
+		$("#Alert").show();
+	}
+	
+	//-----------------------------------------------------------------
+	// clearError
+	//-----------------------------------------------------------------
+	function clearError() {
+		$("#alertMsg").html("");
+		$("#Alert").hide();
+	}
+	
+	//-----------------------------------------------------------------
+	// logText
+	//-----------------------------------------------------------------
+	function logText(txt) {
+		var dt = (new Date()).toLocaleString();
+		console.log(dt + " : " + txt);
+	}
+
+
+	//-----------------------------------------------------------------
+	// logHash
+	//-----------------------------------------------------------------
+	function logHash(txt) {
+        $('#txtLog').val( $('#txtLog').val() + txt + "\n" );
+        $('#txtLog').scrollTop( $('#txtLog')[0].scrollHeight );
+	}
+
+
+	//-----------------------------------------------------------------
+	// serverStatus
+	//-----------------------------------------------------------------
+	function serverStatus(connected) {
+		if (connected) {
+			$("#ServerStatus").html('Data Feed: &nbsp;Connected').css('font-weight', 'normal');
+		} else {
+			$("#ServerStatus").html('Data Feed: &nbsp;Disconnected!').css('font-weight', 'bold');
+		}
+	}
+	
+	
+</script>
+
+<link rel="stylesheet" href="mvis.css">
+
+<style>
+
+input[type=text] {
+	text-align: center;
+}
+
+select {
+	padding: 1px;
+}
+
+button {
+	border-radius: 4px;
+	background-color: #526AFF;
+	color:white;
+	border-width: 0px;
+	width: 75px;
+	height: 26px;
+	cursor: pointer;
+}
+
+button:disabled {
+	background-color: #A0A0A0;
+	cursor:default;
+}
+
+button:enabled:hover {
+	background-color:#4B62E5;
+}
+
+#Alert {
+	border: 2px solid rgb(239,160,160);
+	border-radius: 5px;
+	text-align: center;
+	padding: 10px;
+	width: 421px;
+	margin-top: 19px;
+	margin-left: auto;
+	margin-right: auto;
+	display: none;
+}
+
+#alertMsg {
+	margin: 0px;
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+#txtLog {
+ 	width: 204px; 
+	margin-top: 10px;
+	margin-bottom: 10px;
+	opacity: 0.7;
+}
+
+#target {
+	font-family: Open Sans, Helvetica, Arial, sans-serif;
+	font-size: 10pt;
+	color: #666666;
+	margin-left:5px;
+}
+
+#ServerStatus {
+	margin-left:auto; 
+	margin-right:auto; 
+}
+
+#Donations {
+	margin-top: 60px;
+	margin-left:auto; 
+	margin-right:auto; 
+	width: 600px;
+	text-align:center;
+}
+
+.EthAddr {
+	font-size: 9pt;
+}
+
+</style>
+
+</head>
+
+<body>
+
+	<header>
+	<ul>
+		<li>
+			<a href="miners.html">Miners</a>
+		</li>
+		<li>
+			<a href="barplot.html">Graphs</a>
+		</li>
+		<li>
+			<a href="#">Hash Plots</a>
+		</li>
+	</ul>
+	</header>
+
+	<div style="margin-top:80px;">
+	
+		<label>Miner:&nbsp;&nbsp;</label>
+		
+		<select id="cmbMiners">
+		</select>
+		
+		<label>&nbsp;&nbsp;&nbsp;GPU:&nbsp;&nbsp;</label>
+		<input id="txtGPU" type="text" style="width: 35px;" value="1">
+		
+		<button id="btnStart" style="margin-left: 77px">Start</button>
+		<button id="btnStop" disabled style="margin-left: 17px">Stop</button>
+		<button id="btnClear" style="margin-left: 17px">Clear</button>
+				
+        <!-- alert callout -->
+        <div id="Alert">
+            <p id="alertMsg"></p>
+        </div>
+
+	</div>
+	
+	<div style="position:relative; width:950px;	margin-left: auto; margin-right: auto;">
+		<div id="chart"> </div>
+		<div style="position:relative; top:-30px; left: 80px; text-align: left;">
+			<img src="images/arrow.png">
+			<span id="target">target = 1.32e-14</span>
+		</div>
+	</div>
+	
+	<textarea id="txtLog" rows="9"></textarea> 
+
+	<div id="ServerStatus">
+		Data Feed: Connected
+	</div>
+	
+	<div id='Donations'>
+		<b>Donations:</b><br>
+		ETH : mining-visualizer.eth<br>
+		ETH : <span class="EthAddr">0xA804e933301AA2C919D3a9834082Cddda877C205</span><br>
+		ETC : <span class="EthAddr">0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b</span><br>
+	</div>
+
+</body>
+</html>
+
+

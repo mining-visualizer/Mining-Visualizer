@@ -1,0 +1,614 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Mining Results</title>
+
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+
+<script src="plugins/jquery.js"></script>
+<script src="/plugins/highstock.js"></script>
+
+<script>
+
+	const 
+		SERIES_SOLUTIONS = 0,
+		SERIES_CLOSEHITS = 1,
+		SERIES_WORKUNITS = 2,
+		BUCKET_SIZE = 4,			// hours
+		WORK_UNIT_HISTORY = 5,		// days of work unit history to keep
+		MINER_DATA = 'MinerData';
+					
+	var 
+		// pageID should be unique for each browser / browser instance / html page / browser tab.  we send it to the 
+		// server via the X-MVis-PageID header when we are making a long-polling request.
+		pageID = new Date().getTime(),
+		chart, 
+		zoomStep = 0,
+		chartOptions;
+	
+	
+	//-----------------------------------------------------------------
+	// DocumentReady
+	//-----------------------------------------------------------------
+	$(document).ready(function() {
+
+		buildChart();
+		requestDataStream();
+		longPoll();
+		
+		// this will cause the graph to advance when it's time to move to a new 
+		// work unit bucket, even if there are no work units to display immediately.
+		setInterval(function() { 
+			addWorkUnit(new Date(), 0);
+		}, 60000);
+		
+		// set width and visibility of the server status message beneath the table
+		var serverMsg = $('#ServerStatus');
+		serverMsg.width($('#GraphContainer').width() - 100);
+		serverMsg.show();
+		
+	});	// DocumentReady
+
+
+	//-----------------------------------------------------------------
+	// requestDataStream
+	//-----------------------------------------------------------------
+	function requestDataStream() {
+		// put in a request for real time mining activity data: solutions, close hits and work units.
+		$.ajax({
+			url: "/stream",
+			method: "GET",
+			data: { streams: MINER_DATA },
+			headers: { 'X-MVis-pageID': pageID },
+			success: function( result ) {
+				serverStatus(true);
+			},
+			error: function (xhr, status, error) {
+				if (xhr.responseJSON) {
+					// assuming the error came from MVis,
+					//   - xhr.responseJSON.message is the 'message' field of the JSON response body
+					//   - status is 'error'
+					//   - error is '400 Bad Request'
+					logText(xhr.responseJSON.message);
+				} else {
+					logText('HTTP error in requestDataStream');
+				}
+			}
+		});
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// longPoll
+	//-----------------------------------------------------------------
+	function longPoll() {
+		$.ajax({
+			url: "/poll",
+			method: "POST",
+			headers: {
+				'X-MVis-PageID': pageID, 
+				'Cache-Control' : 'no-cache, no-store, must-revalidate'
+			},
+			timeout: 10000,
+			success: function( result ) {
+				serverStatus(true);
+			  	try 
+			  	{
+			  		if (result.data_id == 'KeepAlive') {
+						//logText('KeepAlive');
+			  		} else if (result.data_id == MINER_DATA) {	
+			  			if (result.sub_type == 'work_unit') {
+			  				addWorkUnit(new Date(), 1);
+			  			} else if (result.sub_type == 'close_hit') {
+			  				addCloseHit(new Date(), result.percent, result.close_hit, result.miner, result.gpu);
+			  			} else if (result.sub_type == 'solution') {
+			  				addSolution(new Date(), result.miner, result.gpu, result.block);
+			  			}
+			  		}
+			  	} catch(e) {
+			  		logText(e.message);
+			  	}
+				longPoll();
+			},
+			error: function (xhr, status, error) {
+				serverStatus(false);
+				if (status == 'timeout') {
+					//logText('Server timed out. Attempting to reconnect ...');
+					longPoll();
+				} else {
+					logText('An error occurred communicating with the server');
+					setTimeout(function() {
+						requestDataStream();
+						longPoll();
+					}, 10 * 1000);
+				}
+			}
+		});
+	}
+
+
+	//-----------------------------------------------------------------
+	// buildChart
+	//-----------------------------------------------------------------
+	function buildChart() {
+	    Highcharts.setOptions({
+			lang: {
+				thousandsSep: ','
+			},
+			global: {
+				// internally, Highcharts works with date/time values as if they were UTC.
+				// this tells it to display times according to the local time zone offset of the browser.
+				useUTC: false
+			}
+		});
+
+		$.getJSON('/ajax/mining_results', function (data) {
+		
+			chartOptions = {
+			    plotOptions: {
+			    	series: {
+			    		animation: false,
+			    		dataGrouping: {
+			    			enabled: false
+			    		}
+			    	}
+			    },
+			    chart: {
+			        type: 'column',
+			        ignoreHiddenSeries: false,
+			        animation: false,
+			        plotBackgroundColor: {
+			            linearGradient: {x1: 0, x2: 0, y1: 0, y2: 1 },
+			            stops: [
+			                [0, '#DDF0FF'],
+			                [0.5, 'rgb(255, 255, 255)']
+			            ]
+			        },
+			    },
+			    title: {
+			        text: 'Mining Results'
+			    },
+			    legend: {
+			    	enabled: true
+			    },
+			    xAxis: {
+			        type: 'datetime',
+			        ordinal: false,
+			        minRange: 5 * 24 * 3600 * 1000,
+			        title: {
+			            reserveSpace: false,
+			        },
+			        dateTimeLabelFormats: {
+			            day: '%b %e',
+			            week: '%b %e',
+			            month: '%b',
+			            year: '%Y'
+			        },
+			        minTickInterval: 20 * 60 * 60 * 1000,		// 20 hours
+			        events: {
+			            setExtremes: function(e) { 
+			            	setZoomSteps(e);
+			            }
+			        }
+			    },
+			    yAxis: [{	// primage axis
+			        title: {
+			            text: 'Difficulty',
+			            margin: -20,
+			        },
+			        tickAmount: 7,
+			        max: 120,
+			        opposite: false,
+			        labels: {
+			            formatter: function () {
+			            	return this.value == 100 ? 'target' : '';
+			            },
+			            y: 2
+			        }
+			    },
+			    {	// secondary axis
+			        title: {
+			            text: 'Work Units',
+			            x: -40,
+			        },
+			        tickAmount: 7,
+			        max: data.WorkUnits.ExpectedWorkUnits * 6,
+			        labels: {
+			            formatter: function () {
+			            	return this.value == (this.axis.max / 6) ? 'expected' : '';
+			            },
+			            y: 2
+			        }
+			    }],
+			    series: [
+				    {
+				        name: 'Solutions',
+				        data: data.Solutions,
+				        id: 'Solutions',
+				        showInNavigator: true,
+				        zIndex: 1,
+				        tooltip: {
+			        		headerFormat: '<b>Solution</b><br>' + 
+			        					  'Miner: {point.miner}, GPU: {point.gpu}<br>' + 
+			        					  'Block: {point.block}<br>' + 
+			        					  '<span style="font-size: 11px">{point.key}</span>',
+			        		pointFormat: '',
+			        		xDateFormat: '%Y-%m-%d %H:%M:%S', 
+			    		},
+						color: {
+						    linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+						    stops: [
+						        [0, '#13CC10'],
+						        [1, '#96FF7C']
+						        //[0, '#F4F244'],
+						        //[1, '#EEC013']
+						    ]
+						},
+						borderColor: '#19E212',
+						//borderColor: '#F1D92C',
+						borderWidth: 1,
+				    	pointWidth: 10
+				    },
+				    {
+				        name: 'Close Hits',
+				        data: data.CloseHits,
+				        id: 'CloseHits',
+				        minPointLength: 2,
+				        zIndex: 3,
+				        tooltip: {
+			        		headerFormat: 'Close Hit: <span style="font-size: 11px"><b>{point.close_hit:,.0f}</b></span><br>' +
+			        					  'Miner: {point.miner}, GPU: {point.gpu}<br>' + '<span style="font-size: 11px">{point.key}</span>',
+			        		pointFormat: '',
+			        		xDateFormat: '%Y-%m-%d %H:%M:%S', 
+			    		},
+						color: {
+						    linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+						    stops: [
+						        [0, '#5799DB'],
+						        [1, '#83B9EF']
+						    ]
+						},
+				    	pointWidth: 3
+				    },
+				    {
+				        name: 'Work Units',
+				        data: data.WorkUnits.data,
+				        yAxis: 1,
+				        id: 'WorkUnits',
+				        showInNavigator: false,
+				        zIndex: 2,
+				    	pointRange: 4 * 60 * 60 * 1000,
+				        pointPadding: 0.05,
+				        borderWidth: 0,
+				        groupPadding: 0,
+				        grouping: false,
+        				crisp: false,
+				        tooltip: {
+			        		xDateFormat: '%Y-%m-%d %H:%M:%S', 
+			    		},
+						color: {
+						    linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+						    stops: [
+						        [0, 'rgba(192, 192, 192, 0.70)'],
+						        [1, 'rgba(239, 239, 239, 0.70)']
+						    ]
+						},
+				    },
+			    ],
+			    credits: false,
+		        rangeSelector: {
+		            allButtonsEnabled: true,
+					buttons: [{
+						type: 'week',
+						count: 1,
+						text: '1w'
+					}, {
+						type: 'month',
+						count: 1,
+						text: '1m'
+					}, {
+						type: 'month',
+						count: 6,
+						text: '6m'
+					}, {
+						type: 'year',
+						count: 1,
+						text: '1y'
+					}, {
+						type: 'all',
+						text: 'All'
+					}],
+					buttonTheme: {
+		                width: 40
+		            },
+		            selected: 0
+		        },
+		        navigator: {
+					series: {
+						type: 'column',
+						pointWidth: 2,
+						max:100,
+						color: '#4EE07A',
+						borderWidth: 0
+					},
+					margin: 10,
+					xAxis: {
+				        dateTimeLabelFormats: {
+				            day: '%b %e',
+				            week: '%b %e',
+				            month: '%b',
+				            year: '%Y'
+				        }
+					},
+				}
+			};
+			
+			chart = Highcharts.stockChart('GraphContainer', chartOptions);
+			    
+		});
+		
+	}	// buildChart
+	
+	
+	//-----------------------------------------------------------------
+	// setZoomSteps
+	//-----------------------------------------------------------------
+	function setZoomSteps(e) {
+    	var range = e.max - e.min;
+    	var currentStep;
+    	
+    	if (range > (22 * 30 * 24 * 60 * 60 * 1000))		// 22 months
+    		currentStep = 5;
+    	else if (range > (10 * 30 * 24 * 60 * 60 * 1000))	// 10 months
+    		currentStep = 4;
+    	else if (range > (5 * 30 * 24 * 60 * 60 * 1000))	// 5 months
+    		currentStep = 3;
+    	else if (range > (3 * 30 * 24 * 60 * 60 * 1000))	// 3 months
+    		currentStep = 2;
+    	else if (range > (28 * 24 * 60 * 60 * 1000))		// 28 days
+    		currentStep = 1;
+    	else
+    		currentStep = 0;
+    		
+    	if (currentStep == zoomStep)
+    		return;
+    	
+    	var solutions = chart.series[SERIES_SOLUTIONS].options;
+    	var closeHits = chart.series[SERIES_CLOSEHITS].options;
+    	var closeHitsVisible, workUnitsVisible;
+    	switch (currentStep) {
+    		case 0:		// < 28 days
+        		solutions.pointWidth = 10;
+        		solutions.borderWidth = 1;
+        		closeHits.pointWidth = 3;
+        		closeHitsVisible = true;
+        		workUnitsVisible= true;
+        		break;
+    		case 1:		// > 28 days
+        		solutions.pointWidth = 6;
+        		solutions.borderWidth = 1;
+        		closeHits.pointWidth = 2;
+        		closeHitsVisible = true;
+        		workUnitsVisible= true;
+        		break;
+    		case 2:		// > 3 months
+        		solutions.pointWidth = 4;
+        		solutions.borderWidth = 1;
+        		closeHits.pointWidth = 1;
+        		closeHitsVisible = true;
+        		workUnitsVisible= true;
+        		break;
+    		case 3:		// > 5 months
+        		solutions.pointWidth = 4;
+        		solutions.borderWidth = 1;
+        		closeHitsVisible = false;
+        		workUnitsVisible= false;
+        		break;
+    		case 4:		// > 10 months
+        		solutions.pointWidth = 3;
+        		solutions.borderWidth = 0;
+        		closeHitsVisible = false;
+        		workUnitsVisible= false;
+        		break;
+    		case 5:		//	> 22 months
+        		solutions.pointWidth = 2;
+        		solutions.borderWidth = 0;
+        		closeHitsVisible = false;
+        		workUnitsVisible= false;
+        		break;
+    	}
+		chart.series[SERIES_SOLUTIONS].update(solutions);
+		chart.series[SERIES_CLOSEHITS].update(closeHits);
+		chart.series[SERIES_CLOSEHITS].setVisible(closeHitsVisible);
+		chart.series[SERIES_WORKUNITS].setVisible(workUnitsVisible);
+		zoomStep = currentStep;
+    }	// setZoomSteps
+
+
+	//-----------------------------------------------------------------
+	// addWorkUnit
+	//-----------------------------------------------------------------
+	function addWorkUnit(dt, count) {
+		var series = chart.get('WorkUnits');
+		
+		// add new bucket or increment existing?
+		var incrementExisting = false;
+		
+		// calculate the hour value of the bucket center point.
+		var bucketID = Math.floor(dt.getHours() / BUCKET_SIZE) * BUCKET_SIZE + 2;
+		
+		// adjust the dt value to the center point
+		dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), bucketID);
+		
+		if (series.data.length > 0) {
+			// grab the last data point (bucket) in the series and check if we can add our new point to it.
+			var pt = series.data[series.data.length - 1];
+			incrementExisting = dt.valueOf() == pt.x;
+		}
+		
+		if (incrementExisting)
+			pt.update(pt.y + count);
+		else 
+		{
+			// do we need to shift out old data?
+			var shift = false;
+			if (series.data.length > 0) {
+				var wuHistory = WORK_UNIT_HISTORY * 24 * 3600 * 1000 - (BUCKET_SIZE * 3600 * 1000);
+				shift = (dt.valueOf() - series.data[0].x) > wuHistory;
+			}
+			addPoint(series, {x: dt.valueOf(), y: count}, shift);
+		}			  				
+	}	// addWorkUnit
+
+
+	//-----------------------------------------------------------------
+	// addCloseHit
+	//-----------------------------------------------------------------
+	function addCloseHit(dt, percent, closeHit, miner, gpu) {
+		var series = chart.get('CloseHits');
+		addPoint(series, {x: dt.valueOf(), y: percent, miner: miner, gpu: gpu + 1, close_hit: closeHit}, false);
+	}
+
+
+	//-----------------------------------------------------------------
+	// addSolution
+	//-----------------------------------------------------------------
+	function addSolution(dt, miner, gpu, block) {
+		var series = chart.get('Solutions');
+		addPoint(series, {x: dt.valueOf(), y: 100, miner: miner, gpu: gpu + 1, block: block}, false);
+	}
+
+	
+	//-----------------------------------------------------------------
+	// addPoint
+	//-----------------------------------------------------------------
+	function addPoint(series, pt, shift) {
+		var extremes = chart.xAxis[0].getExtremes();
+		var scroll = (extremes.max == extremes.dataMax) && (pt.x > extremes.max);
+		series.addPoint(pt, true, shift);
+		if (scroll) {
+			// if the graph was initially scrolled all the way to the right, scroll it now to 
+			// bring the new point into view.
+			var currentRange = extremes.max - extremes.min;
+			if (isNaN(currentRange)) {
+				// this typically happens when the graph does not have any data yet.  set to full data range.
+				chart.xAxis[0].setExtremes(null, null);
+			} else {
+				currentRange = Math.max(currentRange, chart.xAxis[0].minRange);
+				chart.xAxis[0].setExtremes(pt.x - currentRange, pt.x);
+			}
+		}
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// logText
+	//-----------------------------------------------------------------
+	function logText(txt) {
+		var dt = (new Date()).toLocaleString();
+		console.log(dt + " : " + txt);
+	}
+
+
+	//-----------------------------------------------------------------
+	// serverStatus
+	//-----------------------------------------------------------------
+	function serverStatus(connected) {
+		if (connected) {
+			$("#ServerStatus").html('Data Feed: &nbsp;Connected').css('font-weight', 'normal');
+		} else {
+			$("#ServerStatus").html('Data Feed: &nbsp;Disconnected!').css('font-weight', 'bold');
+		}
+	}
+
+</script>
+
+<link rel="stylesheet" href="mvis.css">
+
+<style>
+
+#GraphContainer {
+	width:80%;
+	margin-left: auto;
+	margin-right: auto;
+	height:420px; 
+	margin-top: 42px;
+}
+
+#ServerStatus {
+	width:530px; 
+	margin-left:auto; 
+	margin-right:auto; 
+	text-align:left; 
+	margin-top:15px;
+	padding-left:6px;
+	font-weight:bold;
+	display:none;
+}
+
+#Donations {
+	margin-top: 60px;
+	margin-left:auto; 
+	margin-right:auto; 
+	width: 600px;
+	text-align:center;
+}
+
+.EthAddr {
+	font-size: 9pt;
+}
+
+</style>
+
+</head>
+
+<body>
+
+	<header>
+	<ul>
+		<li>
+			<a href="miners.html">Miners</a>
+		</li>
+		<li>
+			<a href="#">Graphs</a>
+		</li>
+		<li>
+			<a href="scatterplot.html">Hash Plots</a>
+		</li>
+	</ul>
+	</header>
+	
+	<div id="GraphContainer"></div>	
+
+	<div id="ServerStatus">
+		Data Feed: Disconnected!
+	</div>
+	
+	<div id='Donations'>
+		<b>Donations:</b><br>
+		ETH : mining-visualizer.eth<br>
+		ETH : <span class="EthAddr">0xA804e933301AA2C919D3a9834082Cddda877C205</span><br>
+		ETC : <span class="EthAddr">0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b</span><br>
+	</div>
+
+</body>
+</html>

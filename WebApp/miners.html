@@ -1,0 +1,625 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Miners</title>
+
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+<script src="plugins/jquery.js"></script>
+
+<script>
+
+	const 
+		MINER_DATA = 'MinerData';
+	
+	var 
+		// pageID should be unique for each browser/browser instance/html page/browser tab.  we send it to the 
+		// server via the X-MVis-PageID header when we are making a long-polling request.
+		pageID = new Date().getTime(),
+		miners;
+	
+	//-----------------------------------------------------------------
+	// DocumentReady
+	//-----------------------------------------------------------------
+	$(document).ready(function() {
+
+		buildGrid(true);
+		requestDataStream();
+		longPoll();
+		
+		// we do this because while we receive real-time notification of new work units
+		// and hash faults, we do not receive notification when either of those two items
+		// expire out of the 24 hour window.
+		setInterval(buildGrid, 1000 * 120, false);
+		
+		// set width and visibility of the server status message beneath the table
+		var serverMsg = $('#ServerStatus');
+		serverMsg.width($('#tblMiners').width());
+		serverMsg.show();
+		
+	});	// DocumentReady
+
+
+	//-----------------------------------------------------------------
+	// requestDataStream
+	//-----------------------------------------------------------------
+	function requestDataStream() {
+		// put in a request for real time miner data.
+		$.ajax({
+			url: "/stream",
+			method: "GET",
+			data: { streams: MINER_DATA },
+			headers: { 'X-MVis-pageID': pageID },
+			success: function( result ) {
+				serverStatus(true);
+			},
+			error: function (xhr, status, error) {
+				if (xhr.responseJSON) {
+					// assuming the error came from MVis,
+					//   - xhr.responseJSON.message is the 'message' field of the JSON response body
+					//   - status is 'error'
+					//   - error is '400 Bad Request'
+					logText(xhr.responseJSON.message);
+				} else {
+					logText('HTTP error in requestDataStream');
+				}
+			}
+		});
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// longPoll
+	//-----------------------------------------------------------------
+	function longPoll() {
+		$.ajax({
+			url: "/poll",
+			method: "POST",
+			headers: {
+				'X-MVis-PageID': pageID, 
+				'Cache-Control' : 'no-cache, no-store, must-revalidate'
+			},
+			timeout: 10000,
+			success: function( result ) {
+				serverStatus(true);
+			  	try 
+			  	{
+			  		if (result.data_id == 'KeepAlive') {
+						//logText('KeepAlive');
+			  		} else if (result.data_id == MINER_DATA) {	
+			  			if (result.sub_type == 'hash_rates') {
+			  				setHashRates(result);
+			  			} else if (result.sub_type == 'gpu_temps') {
+			  				setGPUTemps(result);
+			  			} else if (result.sub_type == 'fan_speeds') {
+			  				setFanSpeeds(result);
+			  			} else if (result.sub_type == 'hash_fault') {
+			  				newHashFault(result);
+			  			} else if (result.sub_type == 'alerts') {
+			  				setAlertMsg(result.alerts);
+			  			} else if (result.sub_type == 'work_unit') {
+			  				newWorkUnit(result);
+			  			} else if (result.sub_type == 'miner_connect' || result.sub_type == 'miner_disconnect') {
+			  				//logText('location.reload');
+			  				window.location.reload(true);
+			  			}
+			  		}
+			  	} catch(e) {
+			  		logText(e.message);
+			  	}
+				longPoll();
+			},
+			error: function (xhr, status, error) {
+				serverStatus(false);
+				if (status == 'timeout') {
+					//logText('Server timed out. Attempting to reconnect ...');
+					longPoll();
+				} else {
+					logText('An error occurred communicating with the server');
+					setTimeout(function() {
+						requestDataStream();
+						longPoll();
+					}, 10 * 1000);
+				}
+			}
+		});
+	}
+
+
+	//-----------------------------------------------------------------
+	// buildGrid
+	//-----------------------------------------------------------------
+	function buildGrid(firstTime) {
+		var i, j, row;
+		
+		$.getJSON('/ajax/miner_list', function (data) {
+			
+			miners = data.miners;
+			
+			if (firstTime) {
+				for (i = miners.length - 1; i >= 0; i--) {
+					// note: we're doing everything backwards in this loop
+					// clone & add the detail rows
+					if (!miners[i].inactive && miners[i].online) {
+						for (j = 1; j <= miners[i].gpus_reported; j++) {
+							$(".DetailRow").first().clone()
+								.insertAfter($(".DetailRow").first())
+									.attr("MinerID_Detail", miners[i].id);
+						}
+					}
+					if (i == 0) {
+						// put in the minerID
+						row = $(".MinerRow").first().attr("MinerID_Row", miners[i].id);
+					 } else {
+						// clone & add a miner row. insert the minerID.
+						row = $(".MinerRow").first().clone()
+										.insertAfter($(".DetailRow").first())
+											.attr("MinerID_Row", miners[i].id);
+					}
+					if (miners[i].inactive || !miners[i].online) {
+						// hide the expand/collapse button
+						row.find(".imgExpand").hide();
+					}
+					
+				}
+				
+				// first miner will have one too many detail rows
+				$(".DetailRow").first().remove();
+				
+				$(".imgExpand").click(onExpanderClick);
+				
+				// row shading
+				$('.MinerRow').each(function(index) {
+					if (index % 2 == 0) 
+						$(this).addClass('MinerShade');
+					$(this).nextUntil('.MinerRow').each(function(row) {
+						if (row % 2 == 0) 
+							$(this).addClass('GPUShade');
+					});
+				});
+				
+			} // firstTime
+			
+			setStaticFields();
+			
+			for (i = 0; i < miners.length; i++) {
+				if (!miners[i].inactive && miners[i].online) {
+					setHashRates(miners[i]);
+					setGPUTemps(miners[i]);
+					setFanSpeeds(miners[i]);
+					setWorkUnits(miners[i]);
+					setHashFaults(miners[i]);
+				}
+			}
+			
+			setAlertMsg(data.alerts);
+			
+		});
+		
+	}	// buildGrid
+	
+	
+	//-----------------------------------------------------------------
+	// onExpanderClick
+	//-----------------------------------------------------------------
+	function onExpanderClick() {
+		var row = $(this).closest(".MinerRow");
+		var isVisible = !row.next().is(":visible");
+		var minerID = row.attr("MinerID_Row");
+		$("[MinerID_Detail='" + minerID + "']").toggle();
+		row.find(".imgExpand").attr("src", isVisible ? "images/MinusBox.png" : "images/PlusBox.png");
+		if (isVisible)
+			row.find('.Field_MinerName').nextAll().addClass('BoldField')
+		else
+			row.find('.Field_MinerName').nextAll().removeClass('BoldField')
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// setStaticFields
+	//-----------------------------------------------------------------
+	function setStaticFields() {
+		var detailRow = 0;
+		for (var i = 0; i < miners.length; i++) {
+			// miner name
+			$(".Field_MinerName").eq(i).html(miners[i].miner);
+			// gpu count
+			if (!miners[i].inactive && miners[i].online) {
+				$(".Field_GPUCount").eq(i).html(miners[i].gpus_reported);
+				// number the gpu detail rows
+				for (var j = 0; j < miners[i].gpus_reported; j++) {
+					$(".Field_GPU").eq(detailRow++).html('.' + (j+1));
+				}
+			}
+		}
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// setHashRates
+	//-----------------------------------------------------------------
+	function setHashRates(data) {
+		// all rates are in kH/s
+		var minerRow = $(".MinerRow[MinerID_Row='" + data.miner_id + "']");
+		minerRow.children(".Field_HashRate").html(data.miner_rate.toFixed(1));
+		// position on the first detail row
+		minerRow = minerRow.next();
+		for (var i = 0; i < data.gpu_rates.length; i++) {
+			minerRow.find(".Field_HashRate").html(data.gpu_rates[i].toFixed(1));
+			minerRow = minerRow.next();
+		}
+	}
+	
+	//-----------------------------------------------------------------
+	// setGPUTemps
+	//-----------------------------------------------------------------
+	function setGPUTemps(data) {
+		var minerRow = $(".MinerRow[MinerID_Row='" + data.miner_id + "']");
+		minerRow.children(".Field_Temp").html(data.temp_status);
+		// position on the first detail row
+		minerRow = minerRow.next();
+		for (var i = 0; i < data.gpu_temps.length; i++) {
+			minerRow.find(".Field_Temp").html(data.gpu_temps[i]);
+			minerRow = minerRow.next();
+		}
+	}
+	
+	//-----------------------------------------------------------------
+	// setFanSpeeds
+	//-----------------------------------------------------------------
+	function setFanSpeeds(data) {
+		// go straight to the detail rows
+		var detailRow = $(".DetailRow[MinerID_Detail='" + data.miner_id + "']").first();
+		for (var i = 0; i < data.fan_speeds.length; i++) {
+			detailRow.find(".Field_FanSpeed").html(data.fan_speeds[i]);
+			detailRow = detailRow.next();
+		}
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// setWorkUnits
+	//-----------------------------------------------------------------
+	function setWorkUnits(data) {
+		// do the details first
+		var detailRow = $(".DetailRow[MinerID_Detail='" + data.miner_id + "']").first();
+		var sum = 0;
+		for (var i = 0; i < data.gpus_reported; i++) {
+			detailRow.find(".Field_WorkUnit").html(data.work_units[i]);
+			detailRow = detailRow.next();
+			sum += data.work_units[i];
+		}
+		// put the sum in at the top
+		var minerRow = $(".MinerRow[MinerID_Row='" + data.miner_id + "']");
+		minerRow.children(".Field_WorkUnit").html(sum);
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// newWorkUnit
+	//-----------------------------------------------------------------
+	function newWorkUnit(data) {
+		var x = minerIndex(data.miner_id);
+		miners[x].work_units[data.gpu]++;
+		setWorkUnits(miners[x]);
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// setHashFaults
+	//-----------------------------------------------------------------
+	function setHashFaults(data) {
+		// do the details first
+		var detailRow = $(".DetailRow[MinerID_Detail='" + data.miner_id + "']").first();
+		var sum = 0;
+		for (var i = 0; i < data.gpus_reported; i++) {
+			detailRow.find(".Field_HashFaults").html(data.hash_faults[i]);
+			detailRow = detailRow.next();
+			sum += data.hash_faults[i];
+		}
+		// put the sum in at the top
+		var minerRow = $(".MinerRow[MinerID_Row='" + data.miner_id + "']");
+		minerRow.children(".Field_HashFaults").html(sum);
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// setAlertMsg
+	//-----------------------------------------------------------------
+	function setAlertMsg(alerts) {
+		var msgs = [];
+		if (alerts.MinersGPUs)
+			msgs.push('Miners/GPUs #');
+		if (alerts.HashRates)
+			msgs.push('Hash Rates');
+		if (alerts.GPUTemps)
+			msgs.push('GPU Temps');
+		if (alerts.HashFaults)
+			msgs.push('Hash Faults');
+		
+		if(msgs.length > 0)
+			$('#alertMsg').html(msgs.join(', &nbsp;'));
+			
+		$('#Alert').toggle(msgs.length > 0);
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// newHashFault
+	//-----------------------------------------------------------------
+	function newHashFault(data) {
+		var x = minerIndex(data.miner_id);
+		miners[x].hash_faults[data.gpu]++;
+		setHashFaults(miners[x]);
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// minerIndex
+	//-----------------------------------------------------------------
+	function minerIndex(minerID) {
+		for (var i = 0; i < miners.length; i++) {
+		    if (miners[i].miner_id == minerID)
+		    	return i;
+		}
+		var msg = 'Error in function minerIndex: Miner not found!  (minerID=' + minerID + ')';
+		logText(msg);
+		throw msg;
+	}
+	
+	
+	//-----------------------------------------------------------------
+	// logText
+	//-----------------------------------------------------------------
+	function logText(txt) {
+		var dt = (new Date()).toLocaleString();
+		console.log(dt + " : " + txt);
+	}
+
+
+	//-----------------------------------------------------------------
+	// serverStatus
+	//-----------------------------------------------------------------
+	function serverStatus(connected) {
+		if (connected) {
+			$("#ServerStatus").html('Data Feed: &nbsp;Connected').css('font-weight', 'normal');
+		} else {
+			$("#ServerStatus").html('Data Feed: &nbsp;Disconnected!').css('font-weight', 'bold');
+		}
+	}
+
+</script>
+
+<link rel="stylesheet" href="mvis.css">
+
+<style>
+
+h1 {
+	margin: 0px;
+	padding: 55px 0px 30px 0px;
+}
+
+#Alert {
+	text-align: center;
+	width: 421px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	margin-left: auto; 
+	margin-right: auto;
+	display: none;
+	position:relative;
+}
+
+#alertMsg {
+	margin: 0 0 0 6px;
+	font-weight: bold;
+	font-size: 11pt;
+	position:relative;
+	top:-9px;
+}
+
+table, th, td {
+    border: 1px solid silver;
+    border-collapse: collapse;
+    text-align: center;
+	font-family: Open Sans, Helvetica, Arial, sans-serif;
+	font-size: 11pt;
+	margin-left: auto;
+	margin-right: auto;
+ }
+
+th, td {
+	padding: 5px 8px 5px 8px;
+}
+
+th:not(.ExpanderCol), td:not(.ExpanderCol) {
+	width: 50px;
+}
+
+td.Field_MinerName {
+	padding-right:10px;
+	width: 100px;
+}
+
+tr {
+    background-color: #F2F9FF;
+}
+
+th {
+	font-weight: 600;
+	font-style: normal;
+	color:white;
+}
+
+.TableHeader {
+	/*background: linear-gradient(to bottom, #3B5DDB 0%,#446DFF 100%);
+	background: linear-gradient(to bottom, #627BD6 0%,#4363D8 100%);*/
+    background-color: #0088EA;
+}
+	
+.MinerShade {
+    background-color: #DDF0FF;
+}
+
+.GPUShade {
+    background-color: #F9FDFF;
+}
+
+.NameHeader, .Field_MinerName {
+	text-align: left;
+}
+
+.NameRow{
+	text-align: left;
+}
+
+.tblGPUs {	
+	margin-left: 19px;
+	margin-top: 3px;
+	margin-bottom: 8px;
+}
+
+.imgExpand {
+	cursor: pointer;
+}
+
+.ExpanderCol {
+	border-style: solid none solid solid;
+	padding: 5px 1px 5px 4px;
+}
+
+.NameHeader, .Field_MinerName, .NameDetail {
+	border-style: solid solid solid none;
+	padding: 5px 4px 5px 1px;
+}
+
+.DetailRow {
+	display: none;
+}
+
+.BoldField {
+	font-weight: 600;
+	color: #272727;
+}
+
+#ServerStatus {
+	width:530px; 
+	margin-left:auto; 
+	margin-right:auto; 
+	text-align:left; 
+	margin-top:15px;
+	padding-left:6px;
+	font-weight:bold;
+	display:none;
+}
+
+#Donations {
+	margin-top: 60px;
+	margin-left:auto; 
+	margin-right:auto; 
+	width: 600px;
+	text-align:center;
+}
+
+.EthAddr {
+	font-size: 9pt;
+}
+
+</style>
+
+</head>
+
+<body>
+
+	<header>
+	<ul>
+		<li>
+			<a href="#">Miners</a>
+		</li>
+		<li>
+			<a href="barplot.html">Graphs</a>
+		</li>
+		<li>
+			<a href="scatterplot.html">Hash Plots</a>
+		</li>
+	</ul>
+	</header>
+	<h1>Mining Rigs</h1>
+	
+    <!-- alert callout -->
+    <div id="Alert">
+    	<img src="images/alert2.png">
+        <span id="alertMsg">&nbsp;</span>
+    </div>
+	
+	
+	<table id="tblMiners">
+	<tr class="TableHeader">
+		<th class="ExpanderCol"></th> 
+		<th class="NameHeader">Miner</th> 
+		<th title="# of GPUs">GPUs</th>
+		<th title="Hash Rate (MH/s)">Rate</th>
+		<th title="GPU Temperature">Temp.</th>
+		<th title="Fan Speed" style="width: 48px;">Fan</th>
+		<th title="Work units last 24 hrs">W.Units</th>
+		<th title="Hash faults last 24 hrs">Faults</th>
+	</tr>
+	<!--  We'll be adding a attribute to each <tr> element (via jQuery) in the form of MinerID_Row=x  -->
+	<tr class="MinerRow">
+		<td class="ExpanderCol"><img class="imgExpand" src="images/PlusBox.png"></td>
+		<td class="Field_MinerName"></td> 
+		<td class="Field_GPUCount">-</td>
+		<td class="Field_HashRate">-</td>
+		<td class="Field_Temp">-</td>
+		<td>-</td>
+		<td class="Field_WorkUnit">-</td>
+		<td class="Field_HashFaults">-</td>
+	</tr>
+	
+	<!--  We'll be adding a attribute to each <tr> element (via jQuery) in the form of MinerID_Detail=x  -->
+	<tr class="DetailRow">
+		<td class="ExpanderCol"></td>
+		<td class="NameDetail"></td>
+		<td class="Field_GPU">-</td>
+		<td class="Field_HashRate">-</td>
+		<td class="Field_Temp">-</td>
+		<td class="Field_FanSpeed">-</td>
+		<td class="Field_WorkUnit">-</td>
+		<td class="Field_HashFaults">-</td>
+	</tr>
+	
+	</table>
+		
+		
+	<div id="ServerStatus">
+		Data Feed: Disconnected!
+	</div>
+		
+	<div id='Donations'>
+		<b>Donations:</b><br>
+		ETH : mining-visualizer.eth<br>
+		ETH : <span class="EthAddr">0xA804e933301AA2C919D3a9834082Cddda877C205</span><br>
+		ETC : <span class="EthAddr">0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b</span><br>
+	</div>
+	
+</body>
+</html>

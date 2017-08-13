@@ -1,0 +1,877 @@
+object PreferencesDlg: TPreferencesDlg
+  Left = 1871
+  Height = 483
+  Top = 127
+  Width = 799
+  BorderStyle = bsDialog
+  Caption = 'Preferences'
+  ClientHeight = 483
+  ClientWidth = 799
+  DefaultMonitor = dmMainForm
+  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  Position = poMainFormCenter
+  LCLVersion = '1.6.4.0'
+  object pgsSettings: TPageControl
+    Left = 124
+    Height = 385
+    Top = 30
+    Width = 647
+    ActivePage = tabDesktop
+    ParentShowHint = False
+    ShowHint = True
+    ShowTabs = False
+    TabIndex = 2
+    TabOrder = 1
+    OnChange = pgsSettingsChange
+    OnChanging = pgsSettingsChanging
+    object tabMiners: TTabSheet
+      Caption = 'tabMiners'
+      ClientHeight = 377
+      ClientWidth = 639
+      object gridMiners: TStringGrid
+        Left = 12
+        Height = 205
+        Top = 63
+        Width = 372
+        AlternateColor = clNone
+        AutoEdit = False
+        ColCount = 3
+        Columns = <        
+          item
+            MinSize = 40
+            Title.Caption = 'Name'
+            Width = 120
+          end        
+          item
+            Title.Caption = 'IP'
+            Width = 140
+          end        
+          item
+            Alignment = taCenter
+            Title.Alignment = taCenter
+            Title.Caption = 'Port'
+            Width = 70
+          end>
+        FixedCols = 0
+        MouseWheelOption = mwGrid
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goTabs, goRowSelect, goSmoothScroll, goFixedRowNumbering, goFixedColSizing]
+        RowCount = 2
+        TabOrder = 0
+        OnPrepareCanvas = gridMinersPrepareCanvas
+        ColWidths = (
+          120
+          140
+          70
+        )
+      end
+      object ToolBar1: TToolBar
+        AnchorSideLeft.Side = asrBottom
+        Left = 400
+        Height = 142
+        Top = 63
+        Width = 28
+        Align = alNone
+        BorderSpacing.Left = 20
+        Caption = 'ToolBar1'
+        Color = clWindow
+        EdgeBorders = []
+        Images = images1
+        ParentColor = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        Wrapable = False
+        object tbnAdd: TToolButton
+          Left = 1
+          Hint = 'Add new miner'
+          Top = 0
+          Action = actAddRow
+        end
+        object tbnDelete: TToolButton
+          Left = 1
+          Hint = 'Delete miner'
+          Top = 22
+          Action = actDeleteRow
+        end
+        object tbnEdit: TToolButton
+          Left = 1
+          Top = 44
+          Action = actEdit
+        end
+        object tbnMoveUp: TToolButton
+          Left = 1
+          Top = 66
+          Action = actMoveUp
+        end
+        object tbnMoveDown: TToolButton
+          Left = 1
+          Top = 88
+          Action = actMoveDown
+        end
+      end
+      object Label6: TLabel
+        Left = 12
+        Height = 25
+        Top = 12
+        Width = 58
+        Caption = 'Miners'
+        Font.Color = 3355443
+        Font.Height = -19
+        ParentColor = False
+        ParentFont = False
+      end
+      object Shape2: TShape
+        Left = 12
+        Height = 1
+        Top = 38
+        Width = 600
+        Pen.Color = clGray
+      end
+      object txtUdpPassword: TEdit
+        Left = 292
+        Height = 23
+        Hint = 'Password to use when connecting to a miner'
+        Top = 308
+        Width = 84
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+      end
+      object Label12: TLabel
+        Left = 204
+        Height = 15
+        Top = 312
+        Width = 79
+        Caption = 'UDP  Password'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 16
+        Height = 15
+        Top = 312
+        Width = 60
+        Caption = 'UDP  Listen'
+        ParentColor = False
+      end
+      object txtUDPListen: TEdit
+        Left = 84
+        Height = 23
+        Hint = 'UDP port this client listens on.'
+        Top = 308
+        Width = 84
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+      end
+    end
+    object tabWebFace: TTabSheet
+      Caption = 'tabWebFace'
+      ClientHeight = 377
+      ClientWidth = 639
+      object Label3: TLabel
+        Left = 12
+        Height = 25
+        Top = 12
+        Width = 77
+        Caption = 'Web App'
+        Font.Color = 3355443
+        Font.Height = -19
+        ParentColor = False
+        ParentFont = False
+      end
+      object Shape1: TShape
+        Left = 12
+        Height = 1
+        Top = 38
+        Width = 600
+        Pen.Color = clGray
+      end
+      object Label1: TLabel
+        Left = 44
+        Height = 15
+        Top = 102
+        Width = 73
+        Caption = 'Require Login'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 80
+        Height = 15
+        Top = 136
+        Width = 50
+        Caption = 'Password'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 44
+        Height = 15
+        Top = 204
+        Width = 40
+        Caption = 'Use SSL'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 80
+        Height = 15
+        Top = 245
+        Width = 81
+        Caption = 'CA Cert Bundle'
+        ParentColor = False
+      end
+      object Label17: TLabel
+        Left = 80
+        Height = 15
+        Top = 273
+        Width = 57
+        Caption = 'Server Cert'
+        ParentColor = False
+      end
+      object Label21: TLabel
+        Left = 80
+        Height = 15
+        Top = 301
+        Width = 54
+        Caption = 'Server Key'
+        ParentColor = False
+      end
+      object chkLogin: TCheckBox
+        Left = 140
+        Height = 19
+        Top = 101
+        Width = 20
+        OnChange = chkLoginChange
+        TabOrder = 0
+      end
+      object txtPassword: TEdit
+        Left = 144
+        Height = 23
+        Top = 133
+        Width = 100
+        EchoMode = emPassword
+        PasswordChar = '*'
+        TabOrder = 1
+      end
+      object chkUseSSL: TCheckBox
+        Left = 96
+        Height = 19
+        Top = 202
+        Width = 20
+        OnChange = chkUseSSLChange
+        TabOrder = 2
+      end
+      object txtCertBundle: TFileNameEdit
+        Left = 177
+        Height = 23
+        Top = 242
+        Width = 339
+        DialogOptions = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+        FilterIndex = 0
+        HideDirectories = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 3
+        OnChange = FileNameEditChange
+      end
+      object txtServerCert: TFileNameEdit
+        Left = 177
+        Height = 23
+        Top = 270
+        Width = 339
+        DialogOptions = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+        FilterIndex = 0
+        HideDirectories = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 4
+        OnChange = FileNameEditChange
+      end
+      object txtServerKey: TFileNameEdit
+        Left = 177
+        Height = 23
+        Top = 298
+        Width = 339
+        DialogOptions = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+        FilterIndex = 0
+        HideDirectories = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 5
+        OnChange = FileNameEditChange
+      end
+      object Shape8: TShape
+        Left = 44
+        Height = 1
+        Top = 180
+        Width = 471
+        Pen.Color = clSilver
+      end
+      object txtPort: TEdit
+        Left = 131
+        Height = 23
+        Top = 65
+        Width = 64
+        TabOrder = 6
+      end
+      object Label22: TLabel
+        Left = 44
+        Height = 15
+        Top = 68
+        Width = 55
+        Caption = 'HTTP Port'
+        ParentColor = False
+      end
+    end
+    object tabDesktop: TTabSheet
+      Caption = 'tabDesktop'
+      ClientHeight = 377
+      ClientWidth = 639
+      object Label8: TLabel
+        Left = 12
+        Height = 25
+        Top = 12
+        Width = 134
+        Caption = 'Desktop Widget'
+        Font.Color = 3355443
+        Font.Height = -19
+        ParentColor = False
+        ParentFont = False
+      end
+      object Shape3: TShape
+        Left = 12
+        Height = 1
+        Top = 38
+        Width = 600
+        Pen.Color = clGray
+      end
+      object grpHashRates: TRadioGroup
+        Left = 16
+        Height = 122
+        Top = 76
+        Width = 264
+        AutoFill = False
+        BorderSpacing.InnerBorder = 10
+        Caption = 'Hash Rate Display'
+        ChildSizing.LeftRightSpacing = 17
+        ChildSizing.TopBottomSpacing = 9
+        ChildSizing.VerticalSpacing = 8
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 102
+        ClientWidth = 260
+        Items.Strings = (
+          'Total rate for all mining rigs'
+          'Individual rates for each mining rig'
+          'Individual GPU rates'
+        )
+        TabOrder = 0
+      end
+      object Shape5: TShape
+        Left = 324
+        Height = 273
+        Top = 64
+        Width = 1
+        Pen.Color = 14211288
+      end
+      object grpTempDisplay: TRadioGroup
+        Left = 348
+        Height = 94
+        Top = 76
+        Width = 264
+        AutoFill = False
+        BorderSpacing.InnerBorder = 10
+        Caption = 'Temperature Display'
+        ChildSizing.LeftRightSpacing = 17
+        ChildSizing.TopBottomSpacing = 9
+        ChildSizing.VerticalSpacing = 8
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 74
+        ClientWidth = 260
+        Items.Strings = (
+          'Farm status'
+          'Individual GPUs'
+        )
+        TabOrder = 1
+      end
+      object Label13: TLabel
+        Left = 20
+        Height = 15
+        Top = 236
+        Width = 175
+        Caption = 'Hash Rate Deviation Alert (MH/s)'
+        ParentColor = False
+      end
+      object txtHashRateDeviation: TEdit
+        Left = 204
+        Height = 23
+        Top = 233
+        Width = 76
+        TabOrder = 2
+      end
+    end
+    object tabCloseHits: TTabSheet
+      Caption = 'tabCloseHits'
+      ClientHeight = 377
+      ClientWidth = 639
+      object Label10: TLabel
+        Left = 12
+        Height = 25
+        Top = 12
+        Width = 83
+        Caption = 'Close Hits'
+        Font.Color = 3355443
+        Font.Height = -19
+        ParentColor = False
+        ParentFont = False
+      end
+      object Shape4: TShape
+        Left = 12
+        Height = 1
+        Top = 38
+        Width = 600
+        Pen.Color = clGray
+      end
+      object Label11: TLabel
+        Left = 12
+        Height = 15
+        Top = 68
+        Width = 257
+        Caption = 'Average Close Hit Frequency for Desktop Display'
+        ParentColor = False
+      end
+      object txtDifficulty: TLabel
+        Left = 24
+        Height = 15
+        Top = 132
+        Width = 144
+        Caption = 'Estimated Target Threshold'
+        Font.Color = clGray
+        ParentColor = False
+        ParentFont = False
+      end
+      object txtFrequency: TEdit
+        Left = 24
+        Height = 23
+        Top = 96
+        Width = 36
+        OnChange = txtFrequencyChange
+        TabOrder = 0
+        Text = '10'
+      end
+      object cmbFrequencyUnitCH: TComboBox
+        Left = 84
+        Height = 23
+        Top = 96
+        Width = 100
+        ItemHeight = 15
+        ItemIndex = 0
+        Items.Strings = (
+          'Minutes'
+          'Hours'
+          'Days'
+          'Weeks'
+        )
+        OnSelect = cmbFrequencyUnitCHSelect
+        Style = csDropDownList
+        TabOrder = 1
+        Text = 'Minutes'
+      end
+      object Label14: TLabel
+        Left = 12
+        Height = 15
+        Top = 188
+        Width = 231
+        Caption = 'Average Close Hit Frequency for Work Units'
+        ParentColor = False
+      end
+      object txtWorkUnitFrequency: TEdit
+        Left = 24
+        Height = 23
+        Top = 216
+        Width = 36
+        TabOrder = 2
+        Text = '10'
+      end
+      object cmbFrequencyUnitWU: TComboBox
+        Left = 84
+        Height = 23
+        Top = 216
+        Width = 100
+        ItemHeight = 15
+        ItemIndex = 0
+        Items.Strings = (
+          'Minutes'
+          'Hours'
+          'Days'
+          'Weeks'
+        )
+        Style = csDropDownList
+        TabOrder = 3
+        Text = 'Minutes'
+      end
+      object Label15: TLabel
+        Left = 24
+        Height = 15
+        Top = 252
+        Width = 332
+        Caption = 'Actual Target Threshold :  depends on individual GPU hash rate'
+        Font.Color = clGray
+        ParentColor = False
+        ParentFont = False
+      end
+      object txtMinerMask: TEdit
+        Left = 155
+        Height = 23
+        Top = 308
+        Width = 151
+        TabOrder = 4
+      end
+      object Label9: TLabel
+        Left = 12
+        Height = 15
+        Top = 310
+        Width = 114
+        Caption = 'Miner Label Template'
+        ParentColor = False
+      end
+      object trackScale: TTrackBar
+        Left = 372
+        Height = 25
+        Top = 94
+        Width = 172
+        Max = 100
+        Min = 1
+        OnChange = trackScaleChange
+        Position = 1
+        TickStyle = tsNone
+        OnMouseDown = trackScaleMouseDown
+        OnMouseUp = trackScaleMouseUp
+        OnMouseWheel = trackScaleMouseWheel
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+      end
+      object Shape6: TShape
+        Left = 16
+        Height = 1
+        Top = 168
+        Width = 577
+        Pen.Color = 14671839
+      end
+      object Shape7: TShape
+        Left = 16
+        Height = 1
+        Top = 292
+        Width = 577
+        Pen.Color = 14671839
+      end
+      object Label18: TLabel
+        Left = 420
+        Height = 15
+        Top = 76
+        Width = 73
+        Caption = 'Graph Scaling'
+        ParentColor = False
+      end
+      object Label19: TLabel
+        Left = 368
+        Height = 15
+        Top = 119
+        Width = 32
+        Caption = 'Linear'
+        ParentColor = False
+      end
+      object Label20: TLabel
+        Left = 504
+        Height = 15
+        Top = 119
+        Width = 64
+        Caption = 'Logarithmic'
+        ParentColor = False
+      end
+      object Label16: TLabel
+        Left = 344
+        Height = 15
+        Top = 312
+        Width = 196
+        Caption = 'Variables : #MINER#, #GPU#, #DATE#'
+        Font.Color = clGray
+        ParentColor = False
+        ParentFont = False
+      end
+    end
+  end
+  object lstNavigation: TListBox
+    Left = 16
+    Height = 385
+    Top = 32
+    Width = 107
+    ItemHeight = 0
+    OnSelectionChange = lstNavigationSelectionChange
+    TabOrder = 0
+  end
+  object btnClose: TButton
+    Left = 696
+    Height = 25
+    Top = 440
+    Width = 75
+    Caption = 'Close'
+    OnClick = btnCloseClick
+    TabOrder = 2
+  end
+  object images1: TImageList
+    left = 20
+    top = 432
+    Bitmap = {
+      4C69060000001000000010000000000000000000000000000000000000000000
+      0000F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FF000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FF348A38FF348A38FF348A38FF348A38FFF6F6F6FF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FF000000000000
+      0000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A38FF348A
+      38FF348A38FF348A38FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000F6F6F630F6F6
+      F6EFF6F6F6EFF6F6F63000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000F6F6F630F6F6F6EFA09D
+      E0FF635FADFFF6F6F6EFF6F6F630000000000000000000000000000000000000
+      000000000000000000000000000000000000F6F6F630F6F6F6EFF6F6F6FF635F
+      ADFF2E27ADFF635FADFFF6F6F6EF000000000000000000000000000000000000
+      0000000000000000000000000000F6F6F630EAEAEAEF42BCFFFF75CEFFFFF6F6
+      F6FF635FADFFA09DE0FFF6F6F6EF000000000000000000000000000000000000
+      00000000000000000000F6F6F630EAEAEAEF42BCFFFF00A7FFFF00A7FFFF75CE
+      FFFFF6F6F6FFF6F6F6EFF6F6F630000000000000000000000000000000000000
+      000000000000F6F6F660EAEAEAEF42BCFFFF00A7FFFF00A7FFFF00A7FFFF75CE
+      FFFFF6F6F6EFF6F6F63000000000000000000000000000000000000000000000
+      0000F6F6F660F6F6F6FF42BCFFFF00A7FFFF00A7FFFF00A7FFFF75CEFFFFF6F6
+      F6EFF6F6F6300000000000000000000000000000000000000000000000000000
+      0000F6F6F6FFF6F6F6FF42BCFFFF00A7FFFF00A7FFFF75CEFFFFF6F6F6EFF6F6
+      F630000000000000000000000000F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FF889EE0FFF6F6F6FF75CEFFFF75CEFFFFF6F6F6EFF6F6F6300000
+      0000000000000000000000000000F6F6F6FF424242FFF6F6F6FF424242FFF6F6
+      F6FFF6F6F6FF566EB7FF889EE0FFF6F6F6FFF6F6F6EFF6F6F630000000000000
+      0000000000000000000000000000F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6EFF6F6F63000000000000000000000
+      0000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
+      000000000000F6F6F610F6F6F6EFF6F6F6EFF6F6F61000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000F6F6F680B3B3B3FFB3B3B3FFF6F6F68000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F610F6F6F6EF9C5300FF9C5300FFF6F6F6EFF6F6F610000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F680B3B3B3FF9C5300FF9C5300FFB3B3B3FFF6F6F680000000000000
+      000000000000000000000000000000000000000000000000000000000000F6F6
+      F610F6F6F6EF9C5300FF9C5300FF9C5300FF9C5300FFF6F6F6EFF6F6F6100000
+      000000000000000000000000000000000000000000000000000000000000F6F6
+      F680B3B3B3FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3B3FFF6F6F6800000
+      0000000000000000000000000000000000000000000000000000F6F6F610F6F6
+      F6EF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFF6F6F6EFF6F6
+      F610000000000000000000000000000000000000000000000000F6F6F680B3B3
+      B3FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3B3FFF6F6
+      F6800000000000000000000000000000000000000000F6F6F610F6F6F6EF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFF6F6
+      F6EFF6F6F61000000000000000000000000000000000F6F6F680B3B3B3FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3
+      B3FFF6F6F680000000000000000000000000F6F6F610F6F6F6EF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FFF6F6F6EFF6F6F6100000000000000000F6F6F680B3B3B3FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FFB3B3B3FFF6F6F68000000000F6F6F610F6F6F6EF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FFF6F6F6EFF6F6F610F6F6F680B3B3B3FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FFB3B3B3FFF6F6F680F6F6F6EF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FFF6F6F6EFF6F6F600F6F6F600F6F6F600F6F6F600F6F6
+      F600F6F6F600F6F6F600F6F6F600F6F6F600F6F6F600F6F6F600F6F6F600F6F6
+      F600F6F6F600F6F6F600F6F6F600F6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6
+      F6FFF6F6F6FFF6F6F6FFF6F6F6FFF6F6F6EF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FFF6F6F6EFF6F6F680B3B3B3FF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FFB3B3B3FFF6F6F680F6F6F610F6F6F6EF9C5300FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FF9C5300FFF6F6F6EFF6F6F61000000000F6F6F680B3B3B3FF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FFB3B3B3FFF6F6F6800000000000000000F6F6F610F6F6F6EF9C5300FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C53
+      00FFF6F6F6EFF6F6F610000000000000000000000000F6F6F680B3B3B3FF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3
+      B3FFF6F6F68000000000000000000000000000000000F6F6F610F6F6F6EF9C53
+      00FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFF6F6
+      F6EFF6F6F6100000000000000000000000000000000000000000F6F6F680B3B3
+      B3FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3B3FFF6F6
+      F680000000000000000000000000000000000000000000000000F6F6F610F6F6
+      F6EF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FF9C5300FFF6F6F6EFF6F6
+      F61000000000000000000000000000000000000000000000000000000000F6F6
+      F680B3B3B3FF9C5300FF9C5300FF9C5300FF9C5300FFB3B3B3FFF6F6F6800000
+      000000000000000000000000000000000000000000000000000000000000F6F6
+      F610F6F6F6EF9C5300FF9C5300FF9C5300FF9C5300FFF6F6F6EFF6F6F6100000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F680B3B3B3FF9C5300FF9C5300FFB3B3B3FFF6F6F680000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000F6F6F610F6F6F6EF9C5300FF9C5300FFF6F6F6EFF6F6F610000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000F6F6F680B3B3B3FFB3B3B3FFF6F6F68000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000F6F6F610F6F6F6EFF6F6F6EFF6F6F61000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000FFFFFF00F6F6F600F6F6
+      F69F000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000FFFFFF00F0ECE7FFB3B3B3FFE5D7
+      C8FFF6F6F69F0000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000FFFFFF00F0ECE7FFB3B3B3FF424242FF4F4F
+      4FFFE5D7C8FFF6F6F69F00000000000000000000000000000000000000000000
+      000000000000FFFFFF00FFFFFF00F6F6F6EFF0ECE7FF4F4F4FFF424242FF4242
+      42FF4F4F4FFFE5D7C8FFF6F6F69F000000000000000000000000000000000000
+      000000000000FFFFFF00F0EBE6EF4F4F4FFFB3B3B3FFF0ECE7FF4F4F4FFF4242
+      42FF424242FFB3B3B3FFF6F6F6EF000000000000000000000000000000000000
+      0000FFFFFF00F0EBE6EF4F4F4FFF424242FF424242FFB3B3B3FFF0ECE7FF4F4F
+      4FFFB3B3B3FFF6F6F6EFFFFFFF0000000000000000000000000000000000FFFF
+      FF00F0EBE6EF4F4F4FFF424242FF424242FF424242FF424242FFB3B3B3FFF6F6
+      F600F6F6F6EFFFFFFF00FFFFFF00000000000000000000000000FFFFFF00F0EB
+      E6EF4F4F4FFF424242FF424242FF424242FF424242FF424242FFA0A0A0FFF6F6
+      F6EFFFFFFF00BE905C00000000000000000000000000FFFFFF00F0EBE6EF4F4F
+      4FFF424242FF424242FF424242FF424242FF424242FFB3B3B3FFF6F6F6EFFFFF
+      FF0000000000000000000000000000000000FFFFFF00F0EBE6EF4F4F4FFF4242
+      42FF424242FF424242FF424242FF424242FFB3B3B3FFF6F6F6EFFFFFFF00AD72
+      2E00000000000000000000000000FFFFFF00F0EBE6EFB3B3B3FF424242FF4242
+      42FF424242FF424242FF424242FFB3B3B3FFF6F6F6EFFFFFFF00000000000000
+      0000000000000000000000000000F6F6F6EFF0ECE7FF4F4F4FFF424242FF4242
+      42FF424242FF424242FFB3B3B3FFF6F6F6EFFFFFFF0000000000000000000000
+      0000000000000000000000000000F6F6F600B3B3B3FFF0ECE7FF4F4F4FFF4242
+      42FF424242FFB3B3B3FFF6F6F6EFFFFFFF000000000000000000000000000000
+      0000000000000000000000000000F6F6F600424242FFB3B3B3FFF0ECE7FF4F4F
+      4FFFB3B3B3FFF6F6F6EFFFFFFF00000000000000000000000000000000000000
+      0000000000000000000000000000F6F6F600424242FF424242FFB3B3B3FFF6F6
+      F600F6F6F6EFFFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000F6F6F600F6F6F600F6F6F600F6F6F600F6F6
+      F6EFFFFFFF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000
+    }
+  end
+  object actions1: TActionList
+    Images = images1
+    left = 84
+    top = 432
+    object actAddRow: TAction
+      Caption = 'actAddRow'
+      Hint = 'Add new row'
+      ImageIndex = 0
+      OnExecute = actAddRowExecute
+    end
+    object actDeleteRow: TAction
+      Caption = 'actDeleteRow'
+      Hint = 'Delete row'
+      ImageIndex = 1
+      OnExecute = actDeleteRowExecute
+    end
+    object actEdit: TAction
+      Caption = 'actEdit'
+      Hint = 'Edit miner details'
+      ImageIndex = 2
+      OnExecute = actEditExecute
+    end
+    object actMoveUp: TAction
+      Caption = 'actMoveUp'
+      Hint = 'Move row up'
+      ImageIndex = 3
+      OnExecute = actMoveUpExecute
+    end
+    object actMoveDown: TAction
+      Caption = 'actMoveDown'
+      Hint = 'Move row down'
+      ImageIndex = 4
+      OnExecute = actMoveDownExecute
+    end
+    object actCancel: TAction
+      Caption = 'Cancel'
+    end
+    object actOk: TAction
+      Caption = 'OK'
+    end
+  end
+end

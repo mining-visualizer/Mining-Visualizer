@@ -1,0 +1,181 @@
+
+<!-- 	
+	This file is part of Mining Visualizer.
+
+	Mining Visualizer is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Mining Visualizer is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<html>
+<head>
+
+<title>Close Hits</title>
+
+<style>
+
+body {
+	margin: 0px;
+	color: #ffffff;
+}
+
+h1 {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 17px;
+	text-align: center;
+	margin :0px;
+	padding: 5px;
+	background-color:rgba(0,0,0,0.52);
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+}
+
+section {
+	width: 100%;
+	font-weight: 100;
+	background-color:rgba(0,0,0,0.36);
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+	box-sizing: border-box;
+	padding: 8px;
+}
+
+#WidgetBody p {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 10pt;
+}
+
+#Offline p {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 17px;
+  	text-align: center;
+  	padding: 20px;
+	margin: 0px;
+	margin-bottom: 5px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.Values {
+  text-align: right;
+}
+
+.BarCell {
+	padding: 0px;
+}
+
+.BarLine {
+	position: relative; 
+	top: -2px; 
+	border-top: 1px solid rgb(0, 200, 0); 
+	margin: 0px;
+	margin-bottom: 6px;
+}
+
+</style>
+
+<script src="common.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+	function PageLoad() 
+	{
+		heartBeatMs = readDateVar("HeartBeat_CloseHits");
+		setInterval(timerTick, 1000);
+	}
+
+	function timerTick() 
+	{
+		checkHeartBeat();
+	}
+
+</script>
+
+</head>
+
+<body onload="PageLoad()">
+
+	<!-- if HeartBeat_Miners is updated regularly with the current date/time, we'll displaying data, otherwise we'll display
+	     the 'offline' message.  see common.js/checkHeartBeat -->
+	<span id="HeartBeat_CloseHits" style="display: none;"> __HeartBeat_CloseHits__ </span>
+
+	<h1 title="__CloseHitThreshold__">CLOSE HITS</h1>
+	<section id="WidgetBody">
+		<table>
+
+			<!-- close hit 1 -->
+	        <tr>
+	        	<td class="Labels"><p>__CloseHit1_Label__ </p></td>
+	        	<td class="Values"><p title="__CloseHit1_Date__">&nbsp; __CloseHit1_Value__ </p></td>
+	        </tr>
+	        <tr>
+	        	<td class="BarCell" colspan="2">
+	        		<div class="BarLine" style="width:__CloseHit1_Percent__%;"></div>
+	        	</td>
+	        </tr>
+
+			<!-- close hit 2 -->
+	        <tr>
+	        	<td class="Labels"><p>__CloseHit2_Label__ </p></td>
+	        	<td class="Values"><p title="__CloseHit2_Date__">&nbsp; __CloseHit2_Value__ </p></td>
+	        </tr>
+	        <tr>
+	        	<td class="BarCell" colspan="2">
+	        		<p class="BarLine" style="width:__CloseHit2_Percent__%;"></p>
+	        	</td>
+	        </tr>
+	        
+			<!-- close hit 3 -->
+	        <tr>
+	        	<td class="Labels"><p>__CloseHit3_Label__ </p></td>
+	        	<td class="Values"><p title="__CloseHit3_Date__">&nbsp; __CloseHit3_Value__ </p></td>
+	        </tr>
+	        <tr>
+	        	<td class="BarCell" colspan="2">
+	        		<p class="BarLine" style="width:__CloseHit3_Percent__%;"></p>
+	        	</td>
+	        </tr>
+	        
+			<!-- close hit 4 -->
+	        <tr>
+	        	<td class="Labels"><p>__CloseHit4_Label__ </p></td>
+	        	<td class="Values"><p title="__CloseHit4_Date__">&nbsp; __CloseHit4_Value__ </p></td>
+	        </tr>
+	        <tr>
+	        	<td class="BarCell" colspan="2">
+	        		<p class="BarLine" style="width:__CloseHit4_Percent__%;"></p>
+	        	</td>
+	        </tr>
+	        
+			<!-- close hit 5 -->
+	        <tr>
+	        	<td class="Labels"><p>__CloseHit5_Label__ </p></td>
+	        	<td class="Values"><p title="__CloseHit5_Date__">&nbsp; __CloseHit5_Value__ </p></td>
+	        </tr>
+	        <tr>
+	        	<td class="BarCell" colspan="2">
+	        		<p class="BarLine" style="width:__CloseHit5_Percent__%;"></p>
+	        	</td>
+	        </tr>
+	        
+	    </table>
+	</section>
+
+	<section id="Offline" style="display: none;">
+		<p>Data collector is offline</p>
+	</section>
+
+</body>
+</html>
