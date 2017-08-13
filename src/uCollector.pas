@@ -108,7 +108,7 @@ begin
    m_hashRateReference := -1;
    m_lastWebAlert := '';
 
-   // launch the worker thread straight away.
+   // launch the worker thread straight away
 	Inherited Create(false)
 end;
 
