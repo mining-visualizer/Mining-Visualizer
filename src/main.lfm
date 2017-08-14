@@ -58,36 +58,39 @@ object LogView: TLogView
     TabOrder = 3
     object Label1: TLabel
       Left = 48
-      Height = 14
+      Height = 16
       Top = 0
-      Width = 68
+      Width = 75
       Caption = 'donations : '
       ParentColor = False
     end
     object txtDonation1: TEdit
       Left = 123
-      Height = 18
+      Height = 22
       Top = 0
       Width = 157
       BorderStyle = bsNone
+      OnChange = txtDonation1Change
       ParentColor = True
       TabOrder = 0
     end
     object txtDonation2: TEdit
       Left = 123
-      Height = 18
+      Height = 22
       Top = 20
       Width = 357
       BorderStyle = bsNone
+      OnChange = txtDonation2Change
       ParentColor = True
       TabOrder = 1
     end
     object txtDonation3: TEdit
       Left = 123
-      Height = 18
+      Height = 22
       Top = 40
       Width = 357
       BorderStyle = bsNone
+      OnChange = txtDonation3Change
       ParentColor = True
       TabOrder = 2
     end

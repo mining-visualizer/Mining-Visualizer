@@ -111,6 +111,9 @@ TLogView = class(TForm)
 	procedure onSocketReceive(msg: string; ip: string);
 	procedure onSocketError(msg: string);
 	procedure Timer1Timer(Sender: TObject);
+	procedure txtDonation1Change(Sender: TObject);
+	procedure txtDonation2Change(Sender: TObject);
+	procedure txtDonation3Change(Sender: TObject);
 
 public
 	procedure LogMsg(msg: string);
@@ -157,7 +160,8 @@ begin
    Panel1.Font.Name := 'Lucida Grande';
 	Panel1.Font.Size := 11;
    // on the Mac, setting ReadOnly to true also prevents the user from
-   // selecting and copying text.
+   // selecting and copying text, which we want them to be able to do.
+   // we prevent changing in the onChange event handler.
    txtDonation1.ReadOnly := false;
    txtDonation2.ReadOnly := false;
    txtDonation3.ReadOnly := false;
@@ -272,6 +276,21 @@ begin
       Timer1.Enabled := false;
 		g_collector.gaugeRefresh;
    end;
+end;
+
+procedure TLogView.txtDonation1Change(Sender: TObject);
+begin
+   txtDonation1.Text := DONATION_ENS;
+end;
+
+procedure TLogView.txtDonation2Change(Sender: TObject);
+begin
+   txtDonation2.Text := DONATION_ETH;
+end;
+
+procedure TLogView.txtDonation3Change(Sender: TObject);
+begin
+   txtDonation3.Text := DONATION_ETC;
 end;
 
 //  System Tray stuff
