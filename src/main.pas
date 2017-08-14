@@ -49,8 +49,12 @@ uses
 
 const
   
-   MVis_Version = '1.0.0';
-  
+	MVis_Version = '1.0.0';
+	
+   DONATION_ENS = 'mining-visualizer.eth';
+   DONATION_ETH = '0xA804e933301AA2C919D3a9834082Cddda877C205  (ETH)';
+   DONATION_ETC = '0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b  (ETC)';
+   
 type
 
 	{ TLogView }
@@ -152,10 +156,22 @@ begin
 	{$IfDef Darwin}
    Panel1.Font.Name := 'Lucida Grande';
 	Panel1.Font.Size := 11;
+   // on the Mac, setting ReadOnly to true also prevents the user from
+   // selecting and copying text.
    txtDonation1.ReadOnly := false;
    txtDonation2.ReadOnly := false;
    txtDonation3.ReadOnly := false;
 	{$ENDIF}
+   
+   {$IfDef Linux}
+   txtDonation1.color := GetRGBColorResolvingParent;
+   txtDonation2.color := GetRGBColorResolvingParent;
+   txtDonation3.color := GetRGBColorResolvingParent;
+   {$EndIf}
+   
+   txtDonation1.Text := DONATION_ENS;
+   txtDonation2.Text := DONATION_ETH;
+   txtDonation3.Text := DONATION_ETC;
 end;
 
 procedure TLogView.FormShow(Sender: TObject);

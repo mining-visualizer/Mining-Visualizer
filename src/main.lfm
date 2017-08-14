@@ -1,10 +1,10 @@
 object LogView: TLogView
-  Left = 769
+  Left = 465
   Height = 345
-  Top = 249
+  Top = 215
   Width = 536
   Caption = 'Mining Visualizer'
-  ClientHeight = 325
+  ClientHeight = 345
   ClientWidth = 536
   DefaultMonitor = dmMainForm
   Menu = menu1
@@ -17,7 +17,7 @@ object LogView: TLogView
   object btnClear: TButton
     Left = 100
     Height = 25
-    Top = 32
+    Top = 52
     Width = 75
     Anchors = [akLeft, akBottom]
     Caption = 'Clear'
@@ -27,7 +27,7 @@ object LogView: TLogView
   object txtLog: TMemo
     Left = 13
     Height = 182
-    Top = 63
+    Top = 83
     Width = 514
     Anchors = [akLeft, akRight, akBottom]
     ScrollBars = ssBoth
@@ -37,7 +37,7 @@ object LogView: TLogView
   object btnCopy: TButton
     Left = 12
     Height = 25
-    Top = 32
+    Top = 52
     Width = 75
     Anchors = [akLeft, akBottom]
     Caption = 'Copy'
@@ -47,7 +47,7 @@ object LogView: TLogView
   object Panel1: TPanel
     Left = 13
     Height = 64
-    Top = 255
+    Top = 275
     Width = 513
     Anchors = [akLeft, akRight, akBottom]
     BevelOuter = bvNone
@@ -58,44 +58,38 @@ object LogView: TLogView
     TabOrder = 3
     object Label1: TLabel
       Left = 48
-      Height = 15
+      Height = 14
       Top = 0
-      Width = 62
+      Width = 68
       Caption = 'donations : '
       ParentColor = False
     end
     object txtDonation1: TEdit
       Left = 123
-      Height = 15
+      Height = 18
       Top = 0
       Width = 157
       BorderStyle = bsNone
       ParentColor = True
-      ReadOnly = True
       TabOrder = 0
-      Text = 'mining-visualizer.eth'
     end
     object txtDonation2: TEdit
       Left = 123
-      Height = 15
+      Height = 18
       Top = 20
       Width = 357
       BorderStyle = bsNone
       ParentColor = True
-      ReadOnly = True
       TabOrder = 1
-      Text = '0xA804e933301AA2C919D3a9834082Cddda877C205  (ETH)'
     end
     object txtDonation3: TEdit
       Left = 123
-      Height = 15
+      Height = 18
       Top = 40
       Width = 357
       BorderStyle = bsNone
       ParentColor = True
-      ReadOnly = True
       TabOrder = 2
-      Text = '0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b  (ETC)'
     end
   end
   object menu1: TMainMenu
