@@ -296,7 +296,11 @@ begin
 		end;
       g_webFace.onMinerDisconnect;
    	countMinersGPUsOnline;
-      if minerID = m_nodeLiaison then begin
+      if g_miners.onlineCount = 0 then begin
+		   g_widgetData.setValue('GPUTemps', 0);
+		end;
+      assembleHashRates(0);
+		if minerID = m_nodeLiaison then begin
          m_nodeLiaison := -1;
          verifyNodeLiaison(0);
 		end;
