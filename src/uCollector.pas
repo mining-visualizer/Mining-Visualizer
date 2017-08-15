@@ -834,8 +834,13 @@ var
    process: TProcess;
 begin
    action := g_settings.getString('Alerts.action');
-   if action = '' then exit;
-   
+   if (not AnsiStartsText('http', action)) and (not FileExists(action)) then begin
+      if ui then begin
+			Application.MessageBox('The specified alert action could no be found', 'Mining Visualizer', MB_ICONERROR);
+		end;
+      exit;
+	end;
+
    // URL
 	if AnsiStartsText('http', action) then begin
 		http := TFPHTTPClient.Create(nil);
@@ -888,7 +893,16 @@ begin
    else begin
    	process := TProcess.Create(nil);
 		process.Executable := action;
-      process.Execute;
+      try
+			process.Execute;
+		except
+	   	on e: Exception do begin
+            if ui then begin
+      			Application.MessageBox(PChar(e.Message), 'Mining Visualizer', MB_ICONERROR);
+				end;
+				Log.Writeln(['Exception in CCollector.doAlertAction : ', e.Message]);
+			end;
+		end;
       process.Free;
 	end;
 end;
