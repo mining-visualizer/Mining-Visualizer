@@ -22,23 +22,23 @@ unit Main;
 
 {$IfDef Unix}
 // for Linux, BSD, Mac OS X, Solaris
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Win32}
 // for Windows
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Windows}
 // for Windows
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Linux}
 // for Linux,
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Darwin}
 // for OS X,
-{$ENDIF}
+{$EndIf}
 
 interface
 

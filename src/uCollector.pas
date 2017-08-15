@@ -97,7 +97,11 @@ end;
 implementation
 
 uses uGlobals, uJson, uMinerRPC, uLog, DateUtils, Forms, LCLType, uMiners, 
-   	uMiner, uLib, fphttpclient, Main, strutils, LazFileUtils, ShellApi, Process;
+   	uMiner, uLib, fphttpclient, Main, strutils, LazFileUtils, 
+{$IfDef Windows}
+      ShellApi,
+{$EndIf}
+      Process;
 
 type
 
@@ -871,7 +875,12 @@ begin
 			end;
 			Log.Writeln([msg]);
       {$Else}
-			
+			process := TProcess.Create(nil);
+			process.Executable := '/bin/bash';
+			process.Parameters.Add('-c');
+			process.Parameters.Add(action);
+			process.Execute;
+			process.Free;
 		{$EndIf}
 	end
    
