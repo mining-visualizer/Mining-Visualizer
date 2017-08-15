@@ -68,6 +68,9 @@ TLogView = class(TForm)
 	actions: TActionList;
 	btnClear: TButton;
 	btnCopy: TButton;
+	menuHelp: TMenuItem;
+	mnuWebSite: TMenuItem;
+	mnuContents: TMenuItem;
 	txtDonation1: TEdit;
 	txtDonation2: TEdit;
 	txtDonation3: TEdit;
@@ -108,6 +111,8 @@ TLogView = class(TForm)
 	procedure menuFileClick(Sender: TObject);
 	procedure menuTestKeepAliveClick(Sender: TObject);
 	procedure menuTestSchedulerClick(Sender: TObject);
+	procedure mnuContentsClick(Sender: TObject);
+	procedure mnuWebSiteClick(Sender: TObject);
 	procedure onSocketReceive(msg: string; ip: string);
 	procedure onSocketError(msg: string);
 	procedure Timer1Timer(Sender: TObject);
@@ -127,7 +132,7 @@ implementation
 
 {$R *.lfm}
 
-uses uLog, frmPreferences, uGlobals, LCLType, DateUtils, fpjson;
+uses uLog, frmPreferences, uGlobals, LCLType, DateUtils, fpjson, LCLIntf;
 
 var
    firstShow: boolean;		// you can also use form.FormState for this
@@ -247,17 +252,24 @@ begin
 	txtLog.Append(msg);
 end;
 
-procedure TLogView.menuTestKeepAliveClick(Sender: TObject);
-begin
-	//g_tests.testSynchonousKeepAlive;
-end;
-
 procedure TLogView.menuTestSchedulerClick(Sender: TObject);
 begin
-   //g_webFace.onWorkUnit('Desktop', 1, 0);
-   //g_webFace.onCloseHit('test', 77, 7, 5000000);
-	//g_webFace.onSolution('Miner1', 1, 1, 1234567);
-   //g_collector.onHashFault(TJSONArray.Create, 1, false);
+
+end;
+
+procedure TLogView.menuTestKeepAliveClick(Sender: TObject);
+begin
+
+end;
+
+procedure TLogView.mnuContentsClick(Sender: TObject);
+begin
+	OpenURL('https://github.com/mining-visualizer/Mining-Visualizer/wiki');
+end;
+
+procedure TLogView.mnuWebSiteClick(Sender: TObject);
+begin
+	OpenURL('https://github.com/mining-visualizer/Mining-Visualizer');
 end;
 
 procedure TLogView.onSocketReceive(msg: string; ip: string);

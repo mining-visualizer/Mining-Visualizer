@@ -53,7 +53,8 @@ type
       procedure putValue(key: string; val: boolean);
       procedure deleteValue(key: string);
       
-      // these can be used to set values on a TJSONObject at an arbitrary path. path must exist.
+      // these can be used to set values on a TJSONObject at an arbitrary path. path need not exist.
+		// missing object elements will be created, but no arrays.       
       procedure putValue(path, key: string; val: TJSONData);
       procedure putValue(path, key: string; val: string);
       procedure putValue(path, key: string; val: integer);
@@ -63,6 +64,7 @@ type
       procedure endUpdate;
       
    private
+   	procedure forcePath(path: string);
       procedure writeToDisk;
 
    private
@@ -78,7 +80,7 @@ end;
 
 implementation
 
-uses Forms, FileUtil, uMisc, LCLType, uLog, uGlobals;
+uses Forms, FileUtil, uMisc, LCLType, uLog, uGlobals, uLib;
 
 
 procedure CJson.Load(filename: string);
@@ -289,6 +291,7 @@ var
 begin
    try
       x_mutex.Beginwrite;
+      forcePath(path);
 		jObject := TJSONObject(m_json.FindPath(path));
 	   jObject.Delete(key);
 	   jObject.Add(key, val.Clone);
@@ -304,6 +307,7 @@ var
 begin
    try
       x_mutex.Beginwrite;
+      forcePath(path);
 		jObject := TJSONObject(m_json.FindPath(path));
 	   jObject.Delete(key);
 	   jObject.Add(key, TJSONString.Create(val));
@@ -319,6 +323,7 @@ var
 begin
    try
       x_mutex.Beginwrite;
+      forcePath(path);
 		jObject := TJSONObject(m_json.FindPath(path));
 	   jObject.Delete(key);
 	   jObject.Add(key, TJSONIntegerNumber.Create(val));
@@ -334,6 +339,7 @@ var
 begin
    try
       x_mutex.Beginwrite;
+      forcePath(path);
 		jObject := TJSONObject(m_json.FindPath(path));
 	   jObject.Delete(key);
 	   jObject.Add(key, TJSONBoolean.Create(val));
@@ -368,6 +374,26 @@ begin
 	finally
    	x_mutex.Endwrite;
 	end;
+end;
+
+// if the full path does not exist, create any missing elements.  we will create
+// object elements only, no arrays.
+procedure CJson.forcePath(path: string);
+var
+   sList: TStringList;
+   s: string;
+   jObject, jNext: TJSONObject;
+begin
+	sList := Split(path, '.');
+   jObject := m_json;
+   for s in sList do begin
+      jNext := TJSONObject(jObject.Find(s));
+      if jNext = nil then begin
+		   jNext := TJSONObject(jObject.Items[jObject.Add(s, TJSONObject.Create)]);
+		end;
+      jObject := jNext;
+	end;
+	sList.Free;
 end;
 
 

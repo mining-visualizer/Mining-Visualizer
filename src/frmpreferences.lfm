@@ -1,7 +1,7 @@
 object PreferencesDlg: TPreferencesDlg
-  Left = 1871
+  Left = 628
   Height = 483
-  Top = 127
+  Top = 152
   Width = 799
   BorderStyle = bsDialog
   Caption = 'Preferences'
@@ -18,11 +18,11 @@ object PreferencesDlg: TPreferencesDlg
     Height = 385
     Top = 30
     Width = 647
-    ActivePage = tabDesktop
+    ActivePage = tabAlerts
     ParentShowHint = False
     ShowHint = True
     ShowTabs = False
-    TabIndex = 2
+    TabIndex = 4
     TabOrder = 1
     OnChange = pgsSettingsChange
     OnChanging = pgsSettingsChanging
@@ -613,6 +613,78 @@ object PreferencesDlg: TPreferencesDlg
         Font.Color = clGray
         ParentColor = False
         ParentFont = False
+      end
+    end
+    object tabAlerts: TTabSheet
+      Caption = 'tabAlerts'
+      ClientHeight = 377
+      ClientWidth = 639
+      object Shape9: TShape
+        Left = 12
+        Height = 1
+        Top = 38
+        Width = 600
+        Pen.Color = clGray
+      end
+      object Label23: TLabel
+        Left = 12
+        Height = 25
+        Top = 12
+        Width = 48
+        Caption = 'Alerts'
+        Font.Color = 3355443
+        Font.Height = -19
+        ParentColor = False
+        ParentFont = False
+      end
+      object chkAlerts: TCheckBox
+        Left = 32
+        Height = 19
+        Top = 80
+        Width = 62
+        Caption = 'Enabled'
+        OnChange = chkAlertsChange
+        TabOrder = 0
+      end
+      object txtAlertAction: TEdit
+        Left = 56
+        Height = 23
+        Top = 148
+        Width = 424
+        TabOrder = 1
+        Text = 'txtAlertAction'
+      end
+      object Label24: TLabel
+        Left = 56
+        Height = 15
+        Top = 128
+        Width = 203
+        Caption = 'Alert action  (script, command or URL)'
+        ParentColor = False
+      end
+      object Label25: TLabel
+        Left = 56
+        Height = 15
+        Top = 192
+        Width = 194
+        Caption = 'Minimum time until next alert action'
+        ParentColor = False
+      end
+      object txtAlertWait: TEdit
+        Left = 270
+        Height = 23
+        Top = 188
+        Width = 28
+        TabOrder = 2
+        Text = '4'
+      end
+      object Label26: TLabel
+        Left = 306
+        Height = 15
+        Top = 192
+        Width = 38
+        Caption = '(hours)'
+        ParentColor = False
       end
     end
   end
