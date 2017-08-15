@@ -649,10 +649,10 @@ object PreferencesDlg: TPreferencesDlg
       object txtAlertAction: TEdit
         Left = 56
         Height = 23
+        Hint = 'The alert action to execute. Can be a batch file, bash script, executable, or a URL.'
         Top = 148
         Width = 424
         TabOrder = 1
-        Text = 'txtAlertAction'
       end
       object Label24: TLabel
         Left = 56
@@ -673,6 +673,7 @@ object PreferencesDlg: TPreferencesDlg
       object txtAlertWait: TEdit
         Left = 270
         Height = 23
+        Hint = 'To avoid flooding you with alerts, MVis will wait this number of hours before sending another alert.'
         Top = 188
         Width = 28
         TabOrder = 2
@@ -685,6 +686,16 @@ object PreferencesDlg: TPreferencesDlg
         Width = 38
         Caption = '(hours)'
         ParentColor = False
+      end
+      object btnAlertTest: TButton
+        Left = 56
+        Height = 25
+        Hint = 'Run the alert action now'
+        Top = 228
+        Width = 75
+        Caption = 'Test'
+        OnClick = btnAlertTestClick
+        TabOrder = 3
       end
     end
   end

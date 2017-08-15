@@ -50,6 +50,7 @@ type
 		actOk: TAction;
 		actions1: TActionList;
 		btnClose: TButton;
+		btnAlertTest: TButton;
 		chkAlerts: TCheckBox;
 		chkLogin: TCheckBox;
 		chkUseSSL: TCheckBox;
@@ -127,6 +128,7 @@ type
 		procedure actEditExecute(Sender: TObject);
 		procedure actMoveDownExecute(Sender: TObject);
 		procedure actMoveUpExecute(Sender: TObject);
+		procedure btnAlertTestClick(Sender: TObject);
 		procedure btnCloseClick(Sender: TObject);
 		procedure chkAlertsChange(Sender: TObject);
 		procedure chkLoginChange(Sender: TObject);
@@ -575,13 +577,16 @@ function TPreferencesDlg.calcPageHash: string;
 var
    miner: CMiner;
    i: integer;
+   jMiner: TJSONObject;
 begin
    result := '';
    case pgsSettings.ActivePage.Name of
    	'tabMiners': begin
 			for i := 1 to m_minerCount do begin
             miner := gridMiners.Objects[NameCol, i] as CMiner;
-            result += result + miner.AsJSONObject.AsJSON;
+            jMiner := miner.AsJSONObject;
+            result += result + jMiner.AsJSON;
+            jMiner.Free;
 			end;
          result += '|' + txtUDPListen.Text + '|' + txtUdpPassword.Text + '|';
 		end;
@@ -604,7 +609,6 @@ begin
          result := '|' + IntToStr(integer(chkAlerts.Checked)) + '|' + txtAlertAction.Text + '|' + txtAlertWait.Text + '|';
 		end;
 	end;
-   //Log.Writeln(['calcPageHash ', result]);
 end;
 
 
@@ -936,6 +940,11 @@ begin
    txtAlertWait.Enabled := chkAlerts.Checked;
 end;
 
+procedure TPreferencesDlg.btnAlertTestClick(Sender: TObject);
+begin
+   g_settings.putValue('Alerts', 'action', txtAlertAction.Text);
+	g_collector.doAlertAction(true);
+end;
 
 procedure TPreferencesDlg.gridMinersPrepareCanvas(sender: TObject; aCol, aRow: Integer; aState: TGridDrawState);
 begin

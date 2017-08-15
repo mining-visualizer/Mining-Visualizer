@@ -73,8 +73,10 @@ CCollector = class(TThread)
       procedure keepAliveThread;
       procedure assembleHashRates(unused: PtrUInt);
       procedure widgetHeartBeat(data: PtrUInt);
-		procedure updateWebAlerts;
+		procedure updateAlerts;
 		function CheckAlerts: TJSONObject;
+      procedure alertUser;
+      procedure doAlertAction(ui: boolean = false);
       
       procedure disconnectMiners;
 
@@ -94,7 +96,8 @@ end;
 
 implementation
 
-uses uGlobals, uJson, uMinerRPC, uLog, DateUtils, LCLType, uMiners, uMiner, uLib, Main;
+uses uGlobals, uJson, uMinerRPC, uLog, DateUtils, Forms, LCLType, uMiners, 
+   	uMiner, uLib, fphttpclient, Main, strutils, LazFileUtils, ShellApi, Process;
 
 type
 
@@ -427,7 +430,7 @@ begin
       g_widgetData.setValue('MinersGPUsStyle', 'Alert')
    else
       g_widgetData.setValue('MinersGPUsStyle', 'Nominal');
-   updateWebAlerts;
+   updateAlerts;
 end;
 
 
@@ -604,7 +607,7 @@ begin
 	   g_widgetData.setValue('GPUTempsStyle', 'Nominal')
 	else
 	   g_widgetData.setValue('GPUTempsStyle', 'Alert');
-	updateWebAlerts;
+	updateAlerts;
 end;
 
 procedure CCollector.onHashRates(rates: TJSONObject; minerID: integer);
@@ -647,7 +650,7 @@ begin
       g_widgetData.setValue('HashRateStyle', 'Alert')
    else
       g_widgetData.setValue('HashRateStyle', 'Nominal');
-   updateWebAlerts;
+   updateAlerts;
 end;
 
 procedure CCollector.setHashFaultDisplay;
@@ -681,7 +684,7 @@ begin
    g_miningData.aggregateSeries('HashFaults', 24, jMiners, grandTotal);
 	g_widgetData.setValue('HashFaults', grandTotal);
    jMiners.Free;
-   updateWebAlerts;
+   updateAlerts;
 end;
 
 
@@ -782,7 +785,7 @@ begin
    
 end;
 
-procedure CCollector.updateWebAlerts;
+procedure CCollector.updateAlerts;
 var
    s: string;
    jAlerts: TJSONObject;
@@ -791,6 +794,7 @@ begin
    s := jAlerts.AsJSON;
    if s <> m_lastWebAlert then begin
       g_webFace.updateAlerts(jAlerts);
+      alertUser;
       m_lastWebAlert := s;
 	end else
    	jAlerts.Free;
@@ -803,6 +807,81 @@ begin
    result.Add('HashRates', g_widgetData.getValue('HashRateStyle') = 'Alert');
    result.Add('GPUTemps', g_widgetData.getValue('GPUTempsStyle') = 'Alert');
    result.Add('HashFaults', g_widgetData.getValue('HashFaultsStyle') = 'Alert');
+end;
+
+procedure CCollector.alertUser;
+var
+   waitHrs: integer;
+   lastAlert: TDateTime;
+begin
+   if not g_settings.getBool('Alerts.enabled') then exit;
+	waitHrs := g_settings.getInt('Alerts.wait');
+   lastAlert := TDateTime(g_settings.getValue('Alerts.last_alert', 0.0));
+   if HoursBetween(Now, lastAlert) > waitHrs then begin
+      doAlertAction;
+      g_settings.putValue('Alerts', 'last_alert', double(Now));
+	end;
+end;
+
+procedure CCollector.doAlertAction(ui: boolean);
+var
+   http: TFPHTTPClient;
+   action, s, msg: string;
+   process: TProcess;
+begin
+   action := g_settings.getString('Alerts.action');
+   if action = '' then exit;
+   
+   // URL
+	if AnsiStartsText('http', action) then begin
+		http := TFPHTTPClient.Create(nil);
+      try
+			s := http.Get(g_settings.getString('Alerts.action'));
+         logView.LogMsg(s);
+		except
+	   	on e: Exception do begin
+            if ui then begin
+      			Application.MessageBox(PChar(e.Message), 'Mining Visualizer', MB_ICONERROR);
+				end;
+				Log.Writeln(['Exception in CCollector.doAlertAction : ', e.Message]);
+			end;
+		end;
+      http.Free;
+	end
+   
+   // Windows batch file
+   else if CompareFileExt(action, 'bat', false) = 0 then begin
+		{$IfDef Windows}
+			ShellExecute(0, nil, PChar('cmd'), PChar('/c ' + action), nil, 1)
+      {$Else}
+      	msg := 'Exception in CCollector.doAlertAction : BAT file extension is invalid for this OS platform.';
+         if ui then begin
+   			Application.MessageBox(PChar(msg), 'Mining Visualizer', MB_ICONERROR);
+			end;
+			Log.Writeln([msg]);
+		{$EndIf}
+	end
+   
+   // bash script
+   else if CompareFileExt(action, 'sh', false) = 0 then begin
+		{$IfDef Windows}
+      	msg := 'Exception in CCollector.doAlertAction : SH file extension is invalid for this OS platform.';
+         if ui then begin
+   			Application.MessageBox(PChar(msg), 'Mining Visualizer', MB_ICONERROR);
+			end;
+			Log.Writeln([msg]);
+      {$Else}
+			
+		{$EndIf}
+	end
+   
+   // assume it is a binary executable
+   else begin
+   	process := TProcess.Create(nil);
+		process.Executable := action;
+      process.Execute;
+      process.Free;
+	end;
 end;
 
 

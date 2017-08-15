@@ -37,20 +37,24 @@ type
       
       // this returns a clone of the object, if found.  caller is responsible to free.
       function getValue(path: string; defaultClass: TJsonClass): TJSONData;
+      
       function getValue(path: string; defaultVal: string): string;
       function getValue(path: string; defaultVal: integer): integer;
       function getValue(path: string; defaultVal: boolean): boolean;
+      function getValue(path: string; defaultVal: double): double;
       
-      // these 3 functions will return pre-programmed defaults if 'path' does not exist (see setDefaults)
+      // these 4 functions will return pre-programmed defaults if 'path' does not exist (see setDefaults)
       function getString(path: string): string;
       function getInt(path: string): integer;
       function getBool(path: string): boolean;
+      function getFloat(path: string): double;
       
 		// these methods can only be used to operate on top-level elements
       procedure putValue(key: string; val: TJSONData);
       procedure putValue(key: string; val: string);
       procedure putValue(key: string; val: integer);
       procedure putValue(key: string; val: boolean);
+      procedure putValue(key: string; val: double);
       procedure deleteValue(key: string);
       
       // these can be used to set values on a TJSONObject at an arbitrary path. path need not exist.
@@ -59,6 +63,7 @@ type
       procedure putValue(path, key: string; val: string);
       procedure putValue(path, key: string; val: integer);
       procedure putValue(path, key: string; val: boolean);
+      procedure putValue(path, key: string; val: double);
    
       procedure beginUpdate;
       procedure endUpdate;
@@ -203,6 +208,22 @@ begin
 	end;
 end;
 
+function CJson.getValue(path: string; defaultVal: double): double;
+var
+	jData: TJSONData;
+begin
+   try
+      x_mutex.Beginread;
+		jData := m_json.FindPath(path);
+	   if jData = nil then
+	      result := defaultVal
+	   else
+	   	result := jData.AsFloat;
+	finally
+   	x_mutex.Endread;
+	end;
+end;
+
 function CJson.getString(path: string): string;
 begin
 	if m_defaults.IndexOfName(path) = -1 then
@@ -222,6 +243,13 @@ begin
 	if m_defaults.IndexOfName(path) = -1 then
    	raise Exception2.Create('Exception in CJson.getValue : path "' + path + '" not found in defaults list.');
    result := getValue(path, StrToInt(m_defaults.Values[path]) <> 0);
+end;
+
+function CJson.getFloat(path: string): double;
+begin
+	if m_defaults.IndexOfName(path) = -1 then
+   	raise Exception2.Create('Exception in CJson.getValue : path "' + path + '" not found in defaults list.');
+   result := getValue(path, StrToFloat(m_defaults.Values[path]));
 end;
 
 // the next set of methods can only be used to operate on top-level elements
@@ -267,6 +295,18 @@ begin
       x_mutex.Beginwrite;
 		m_json.Delete(key);
 	   m_json.Add(key, TJSONBoolean.Create(val));
+	   writeToDisk;
+	finally
+   	x_mutex.Endwrite;
+	end;
+end;
+
+procedure CJson.putValue(key: string; val: double);
+begin
+   try
+      x_mutex.Beginwrite;
+		m_json.Delete(key);
+	   m_json.Add(key, TJSONFloatNumber.Create(val));
 	   writeToDisk;
 	finally
    	x_mutex.Endwrite;
@@ -343,6 +383,22 @@ begin
 		jObject := TJSONObject(m_json.FindPath(path));
 	   jObject.Delete(key);
 	   jObject.Add(key, TJSONBoolean.Create(val));
+	   writeToDisk;
+	finally
+   	x_mutex.Endwrite;
+	end;
+end;
+
+procedure CJson.putValue(path, key: string; val: double);
+var
+	jObject: TJSONObject;
+begin
+   try
+      x_mutex.Beginwrite;
+      forcePath(path);
+		jObject := TJSONObject(m_json.FindPath(path));
+	   jObject.Delete(key);
+	   jObject.Add(key, TJSONFloatNumber.Create(val));
 	   writeToDisk;
 	finally
    	x_mutex.Endwrite;
