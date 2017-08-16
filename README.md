@@ -1,5 +1,18 @@
 # Mining-Visualizer
 
+##### Table of Contents
+
+- [Introduction](#introduction)
+- UI Elements
+	- [Desktop Widgets](#desktop-widgets)
+	- [Web Application](#web-app)
+- [Software Components](#software-components)
+- [Platform Support](#platform-support)
+- [Download](#Download)
+- [Documentation](#Documentation)
+- [Build From Source](#build-from-source)
+- [Donations](#donations)
+
 ### Introduction
 
 Mining Visualizer is a [suite of programs](#software-components) with some special features for solo miners.
