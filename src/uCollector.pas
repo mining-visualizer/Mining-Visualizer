@@ -26,15 +26,17 @@ uses
 	Classes, SysUtils, uTasks, uWidgetData, fpjson;
 
 const
-   INTERVAL_HASH_RATES = 3000;
-   INTERVAL_ASSEMBLE_HASH_RATES = INTERVAL_HASH_RATES;
-   INTERVAL_TEMPERATURES = 2000;
-   INTERVAL_FANSPEEDS = 2000;
-   INTERVAL_VERIFY_LIAISON = 30 * 1000;
-   INTERVAL_KEEP_ALIVE = 45 * 1000;
-   INTERVAL_POLL_OFFLINE = 10 * 1000;
-   INTERVAL_PEER_COUNT = 20 * 1000;
-   INTERVAL_BALANCE = 30 * 1000;
+   INTVL_DELAYED_START = 2000;
+   INTVL_HASH_RATES = 3000;
+   INTVL_ASSEMBLE_HASH_RATES = INTVL_HASH_RATES;
+   INTVL_TEMPERATURES = 2000;
+   INTVL_FANSPEEDS = 2000;
+   INTVL_VERIFY_LIAISON = 30 * 1000;
+   INTVL_KEEP_ALIVE = 45 * 1000;
+   INTVL_POLL_OFFLINE = 10 * 1000;
+   INTVL_PEER_COUNT = 20 * 1000;
+   INTVL_BALANCE = 30 * 1000;
+   INTVL_ALERTS_START_DELAY = 5000;
 	
 type
 
@@ -73,7 +75,7 @@ CCollector = class(TThread)
       procedure keepAliveThread;
       procedure assembleHashRates(unused: PtrUInt);
       procedure widgetHeartBeat(data: PtrUInt);
-		procedure updateAlerts;
+		procedure updateAlerts(data: PtrUInt);
 		function CheckAlerts: TJSONObject;
       procedure alertUser;
       procedure doAlertAction(ui: boolean = false);
@@ -87,6 +89,7 @@ CCollector = class(TThread)
       // used to detect when hash rates change significantly (some things need recalculation)
       m_hashRateReference: double;
       m_lastWebAlert: string;
+      m_startedAt: TDateTime;
 
 end;
 
@@ -114,6 +117,7 @@ begin
    m_nodeLiaison := -1;
    m_hashRateReference := -1;
    m_lastWebAlert := '';
+   m_startedAt := Now;
 
    // launch the worker thread straight away
 	Inherited Create(false)
@@ -131,17 +135,6 @@ begin
    m_tasks.Free;
 	inherited Destroy;
 end;
-
-procedure CCollector.disconnectMiners;
-var
-   i: integer;
-begin
-   Log.Writeln(['Trace: CCollector.shutDown'], true);
-   for i := 0 to g_miners.count - 1 do
-      if g_miners.byRow[i].online then
-			g_minerRPC.disconnect(g_miners.byRow[i].ip, g_miners.byRow[i].port);
-end;
-
 
 // this is the main background worker thread.
 procedure CCollector.Execute;
@@ -167,16 +160,18 @@ begin
 	pollOfflineMiners(0);
 
    // various tasks that need to be run after a short delay.
-   m_tasks.scheduleTask(@delayedStartTasks, Ord(Startup), 2000, false, 'delayedStartTasks');
+   m_tasks.scheduleTask(@delayedStartTasks, Ord(Startup), INTVL_DELAYED_START, false, 'delayedStartTasks');
 
    // periodic check that our node liaison is still there
-   m_tasks.scheduleTask(@verifyNodeLiaison, 0, INTERVAL_VERIFY_LIAISON, true, 'verifyNodeLiaison');
+   m_tasks.scheduleTask(@verifyNodeLiaison, 0, INTVL_VERIFY_LIAISON, true, 'verifyNodeLiaison');
 
    // let the miners know we're still here, and to keep sending data
-   m_tasks.scheduleTask(@keepAlive, 0, INTERVAL_KEEP_ALIVE, true, 'keepAlive');
+   m_tasks.scheduleTask(@keepAlive, 0, INTVL_KEEP_ALIVE, true, 'keepAlive');
 
 	// periodic check to see if any offline miners have come online recently
-   m_tasks.scheduleTask(@pollOfflineMiners, 0, INTERVAL_POLL_OFFLINE, true, 'pollOfflineMiners');
+   m_tasks.scheduleTask(@pollOfflineMiners, 0, INTVL_POLL_OFFLINE, true, 'pollOfflineMiners');
+   
+   m_tasks.scheduleTask(@updateAlerts, 1, INTVL_ALERTS_START_DELAY + 1000, false, 'alertsStartDelay');
 
    widgetHeartBeat(0);
    m_tasks.scheduleTask(@widgetHeartBeat, 0, 10 * 1000, true, 'widgetHeartBeat');
@@ -205,7 +200,7 @@ begin
    
    sleep(5000);
  	pollOfflineMiners(0);
-   m_tasks.scheduleTask(@delayedStartTasks, Ord(SleepAwake), 2000, false, 'awake:delayedStartTasks');
+   m_tasks.scheduleTask(@delayedStartTasks, Ord(SleepAwake), INTVL_DELAYED_START, false, 'awake:delayedStartTasks');
 end;
 
 
@@ -254,12 +249,12 @@ begin
 			g_minerRPC.requestBestHashNotify(ip, port);
 
          // gpu temps and thermal protection
-         g_minerRPC.requestGPUTempsNotify(ip, port, INTERVAL_TEMPERATURES, 1.0);
+         g_minerRPC.requestGPUTempsNotify(ip, port, INTVL_TEMPERATURES, 1.0);
 			g_minerRPC.setThermalProtection(ip, port, neverExceedTemp, safetyShutdown);
-         g_minerRPC.requestFanSpeedNotify(ip, port, INTERVAL_FANSPEEDS, 20);
+         g_minerRPC.requestFanSpeedNotify(ip, port, INTVL_FANSPEEDS, 20);
          
          // hash rates
-         g_minerRPC.requestHashRatesNotify(ip, port, INTERVAL_HASH_RATES, 0.2);
+         g_minerRPC.requestHashRatesNotify(ip, port, INTVL_HASH_RATES, 0.2);
         
          // get any new close hits
          if connectData['close_hits'].AsInteger > 0 then
@@ -316,6 +311,17 @@ begin
    	on e: Exception do
 			Log.Writeln(['Exception in CCollector.onMinerDisconnect : ', e.Message]);
 	end;
+end;
+
+
+procedure CCollector.disconnectMiners;
+var
+   i: integer;
+begin
+   Log.Writeln(['Trace: CCollector.shutDown'], true);
+   for i := 0 to g_miners.count - 1 do
+      if g_miners.byRow[i].online then
+			g_minerRPC.disconnect(g_miners.byRow[i].ip, g_miners.byRow[i].port);
 end;
 
 
@@ -392,8 +398,8 @@ begin
 		      if online then begin
 	            m_nodeLiaison := id;
 	            g_minerRPC.requestWorkPackagesNotify(ip, port, RateOnChange);
-               g_minerRPC.requestPeerCountNotify(ip, port, INTERVAL_PEER_COUNT, 1);
-               g_minerRPC.requestAcctBalanceNotify(ip, port, INTERVAL_BALANCE, 0.001);
+               g_minerRPC.requestPeerCountNotify(ip, port, INTVL_PEER_COUNT, 1);
+               g_minerRPC.requestAcctBalanceNotify(ip, port, INTVL_BALANCE, 0.001);
 	            break;
 				end;
    end else begin
@@ -434,7 +440,7 @@ begin
       g_widgetData.setValue('MinersGPUsStyle', 'Alert')
    else
       g_widgetData.setValue('MinersGPUsStyle', 'Nominal');
-   updateAlerts;
+   updateAlerts(0);
 end;
 
 
@@ -611,7 +617,7 @@ begin
 	   g_widgetData.setValue('GPUTempsStyle', 'Nominal')
 	else
 	   g_widgetData.setValue('GPUTempsStyle', 'Alert');
-	updateAlerts;
+   updateAlerts(0);
 end;
 
 procedure CCollector.onHashRates(rates: TJSONObject; minerID: integer);
@@ -654,7 +660,7 @@ begin
       g_widgetData.setValue('HashRateStyle', 'Alert')
    else
       g_widgetData.setValue('HashRateStyle', 'Nominal');
-   updateAlerts;
+   updateAlerts(0);
 end;
 
 procedure CCollector.setHashFaultDisplay;
@@ -688,7 +694,7 @@ begin
    g_miningData.aggregateSeries('HashFaults', 24, jMiners, grandTotal);
 	g_widgetData.setValue('HashFaults', grandTotal);
    jMiners.Free;
-   updateAlerts;
+   updateAlerts(0);
 end;
 
 
@@ -789,16 +795,21 @@ begin
    
 end;
 
-procedure CCollector.updateAlerts;
+procedure CCollector.updateAlerts(data: PtrUInt);
 var
    s: string;
    jAlerts: TJSONObject;
 begin
    jAlerts := CheckAlerts;
    s := jAlerts.AsJSON;
-   if s <> m_lastWebAlert then begin
-      g_webFace.updateAlerts(jAlerts);
-      alertUser;
+   // at startup we want to avoid flashing alerts until all miners have reported in and things have 
+   // stabilized somewhat.  there's a delayed start task scheduled at startup slightly after 
+   // INTVL_ALERTS_START_DELAY to make sure we send out the necessary alerts at that time in case there's
+   // a lull in activity right then.
+   if (s <> m_lastWebAlert) and (MillisecondsBetween(Now, m_startedAt) > INTVL_ALERTS_START_DELAY) then begin
+      if jAlerts['MasterAlert'].AsBoolean then
+      	alertUser;
+      g_webFace.updateAlerts(jAlerts); // jAlerts is freed in the g_webFace.updateAlerts call chain
       m_lastWebAlert := s;
 	end else
    	jAlerts.Free;
@@ -811,6 +822,8 @@ begin
    result.Add('HashRates', g_widgetData.getValue('HashRateStyle') = 'Alert');
    result.Add('GPUTemps', g_widgetData.getValue('GPUTempsStyle') = 'Alert');
    result.Add('HashFaults', g_widgetData.getValue('HashFaultsStyle') = 'Alert');
+   result.Add('MasterAlert', result['MinersGPUs'].AsBoolean or result['HashRates'].AsBoolean or 
+   								  result['GPUTemps'].AsBoolean or result['HashFaults'].AsBoolean);
 end;
 
 procedure CCollector.alertUser;
@@ -822,8 +835,11 @@ begin
 	waitHrs := g_settings.getInt('Alerts.wait');
    lastAlert := TDateTime(g_settings.getValue('Alerts.last_alert', 0.0));
    if HoursBetween(Now, lastAlert) > waitHrs then begin
-      doAlertAction;
       g_settings.putValue('Alerts', 'last_alert', double(Now));
+      Log.Writeln(['Sending action alert'], true);
+      doAlertAction;
+	end else begin
+      Log.Writeln(['Action alert, but we sent one recently'], true);
 	end;
 end;
 
