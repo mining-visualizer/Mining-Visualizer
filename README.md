@@ -85,9 +85,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 
 ### Software Components
 
-This software suite is made up of two programs.  The first is the program in this repo, which I refer to as Mining Visualizer proper, or just MVis.  It is basically a relay / data collection program that communicates with the miner and drives the desktop widgets and the web application.  The second component is [the miner](), which is a fork of Genoil's ethminer.  I often refer to this program as *MVis-ethminer*.
-
-For software downloads, please visit the Github repo.  There is full documentation in the wiki.  If you find any problems, please report them here, or file an issue on Github.
+This software suite is made up of two programs.  The first is the program in this repo, which I refer to as Mining Visualizer proper, or just MVis.  It is basically a relay / data collection program that communicates with the miner and drives the desktop widgets and the web application.  The second component is [the miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  I often refer to this program as *MVis-ethminer*.
 
 
 ### Platform support
@@ -101,14 +99,14 @@ For the latest binaries, please visit the [Mining Visualizer Release](releases) 
 
 ### Documentation
 
-Full documentation is available in the [wiki](wiki) for this repo, including instructions to install and setup this software.
+Full documentation is available in the [wiki](https://github.com/mining-visualizer/Mining-Visualizer/wiki) for this repo, including instructions to install and setup this software.
 
 ### Build From Source
 
 * Download and install [Lazarus Pascal](https://www.lazarus-ide.org).
 * Launch the Lazarus Pascal IDE and use it to open `MiningVisualizer.lpi`.
 * Select *Run / Compile* from the menu.
-* You can also build from the command line if you wish.  See the scripts in the [Build](build) folder for ideas.
+* You can also build from the command line if you wish.  See the scripts in the [Build](Build) folder for ideas.
 
 ### Donations
 
