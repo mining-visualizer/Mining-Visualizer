@@ -2,9 +2,6 @@
 
 ### Introduction
 
-
-![](wiki/images/widget_miners.png)
-
 Mining Visualizer is a [suite of programs](#software-components) with some special features for solo miners.
 
 #### Solo Miners!!!  Seriously, dude ... nobody solo mines anymore!!!
