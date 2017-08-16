@@ -8,8 +8,8 @@
 	- [Web Application](#web-app)
 - [Software Components](#software-components)
 - [Platform Support](#platform-support)
-- [Download](#Download)
-- [Documentation](#Documentation)
+- [Download](#download)
+- [Documentation](#documentation)
 - [Build From Source](#build-from-source)
 - [Donations](#donations)
 
