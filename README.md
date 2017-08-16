@@ -4,10 +4,6 @@
 
 Mining Visualizer is a [suite of programs](#software-components) with some special features for solo miners.
 
-
-
-![](../../wiki/images/widget_miners.png)
-
 #### Solo Miners!!!  Seriously, dude ... nobody solo mines anymore!!!
 
 It's true there are not many solo miners out there.  The vast majority of hashing power is being directed to pool mining operations (currently about 94%).  If you have only 1 GPU, the average time to mine a block is currently something ridiculous like **750 days**! So if that's you, I'd recommend sticking to pool mining.  However, larger mining operations may be interested in some of the features that I've added to this program.  
@@ -22,7 +18,7 @@ Being a programmer, ideas started coming into my mind about ways to make the exp
 
 Mining Visualizer comes with 4 desktop widgets that display various data items that let you monitor your mining operation at a glance.  These are powered by **Rainmeter** for Windows, and **GeekTool** for the Mac.  Unfortunately there is nothing available for Linux in this category (but see below for the Web App).  Most of the items are pretty self explanatory, but I will comment on a few.
 
-![](widget_miners.png)
+![](../../wiki/images/widget_miners.png)
 
 
 * **Hash faults**: the total number of hash faults that have been reported from your mining farm over the last 24 hours.  This line will display in Yellow if any of your miners has exceeded the user defined hash fault limit.  The miner is a fork of Genoil's ethminer, and it checks for hash faults **much more often** then Genoil's did (1 hash check per kernel run), so don't be surprised if the numbers seem high.  This will give you an early indicator if one of your GPUs is failing, or you're pushing it too hard with overclocking.
@@ -30,7 +26,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 ### Mining Activity
 
-![](widget_activity.png)
+![](../../wiki/images/widget_activity.png)
 
 * **Last Solution** - the last time you mined a block
 * **Next Solution** - an estimate of when you will mine your next block, based on your current hash rate and the network difficulty. Remember,  though, there is no guarantee that you will mine a block by this time.  The generation of hashes (mining) is a completely random process.  It is like rolling a dice.  Variance will affect your mining results.  Sometimes you will mine a block sooner,  sometimes later.
@@ -41,7 +37,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 ### Network
 
-![](widget_network.gif)
+![](../../wiki/images/widget_network.gif)
 
 * **Balance** - Of course, mining a block is the **big, exciting event** that every solo miner waits for, so I wanted to make that stand out as much as possible. This line displays the current balance of your mining account.  It will cycle through one of five colors every time you mine a block to give you an easy-to-see, visual indicator of this momentous event.  You can customize the colors, or even disable it if you think it's tacky.
 
@@ -50,7 +46,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 "If mining a block is what we are all waiting for", I thought, "why not keep track of when you ***almost*** mined a block".  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as *Close Hits*. The desktop widget shows the last 5 close hits found by your mining farm, with a little accompanying bar graph. Smaller values are better.
 
-![](widget_closehits.png)
+![](../../wiki/images/widget_closehits.png)
 
 
 ## Web App
@@ -59,7 +55,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 
 #### Mining Rigs
 
-![](web_app_miners2.png)
+![](../../wiki/images/web_app_miners2.png)
 
 <br>
 
@@ -70,7 +66,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 * Close Hits are graphed individually, whereas Work Units are grouped into 4 hour intervals and displayed as a histogram.
 
 
-![](web_app_graph.png)
+![](../../wiki/images/web_app_graph.png)
 
 <br>
 
@@ -82,7 +78,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 * The Current Target value (similarly scaled) is shown for reference.
 
 
-![](scatter.gif)
+![](../../wiki/images/scatter.gif)
 
 
 <br>
