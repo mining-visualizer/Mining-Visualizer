@@ -102,15 +102,6 @@ begin
 		g_settings := CJson.Create;
       g_settings.Load('config.json');
       
-      // just a hacky way to make sure all the necessary paths exist so the putValue's don't explode
-		jObject := TJSONObject(g_settings.getValue('CloseHits', TJSONObject));
-      g_settings.putValue('CloseHits', jObject);
-      jObject.Free;
-		jObject := TJSONObject(g_settings.getValue('WebInterface', TJSONObject));
-      g_settings.putValue('WebInterface', jObject);
-      jObject.Free;
-      
-      
       g_settings.setDefaults([
       				'DevEnv', '0',
                   'UdpListen', '5226',
@@ -128,7 +119,10 @@ begin
                   'WebInterface.use_ssl', '0',
                   'WebInterface.ca_cert_bundle', '',
                   'WebInterface.server_cert', '',
-                  'WebInterface.server_key', ''
+                  'WebInterface.server_key', '',
+                  'Alerts.enabled', '0',
+                  'Alerts.action', '',
+                  'Alerts.wait', '4'
       ]);
 	
       uPort := g_settings.getInt('UdpListen');

@@ -22,23 +22,23 @@ unit Main;
 
 {$IfDef Unix}
 // for Linux, BSD, Mac OS X, Solaris
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Win32}
 // for Windows
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Windows}
 // for Windows
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Linux}
 // for Linux,
-{$ENDIF}
+{$EndIf}
 
 {$IfDef Darwin}
 // for OS X,
-{$ENDIF}
+{$EndIf}
 
 interface
 
@@ -49,8 +49,12 @@ uses
 
 const
   
-   MVis_Version = '1.0.0';
-  
+	MVis_Version = '1.0.0';
+	
+   DONATION_ENS = 'mining-visualizer.eth';
+   DONATION_ETH = '0xA804e933301AA2C919D3a9834082Cddda877C205  (ETH)';
+   DONATION_ETC = '0x29224Be72851D7Bad619f64c2E51E8Ca5Ba1094b  (ETC)';
+   
 type
 
 	{ TLogView }
@@ -64,6 +68,9 @@ TLogView = class(TForm)
 	actions: TActionList;
 	btnClear: TButton;
 	btnCopy: TButton;
+	menuHelp: TMenuItem;
+	mnuWebSite: TMenuItem;
+	mnuContents: TMenuItem;
 	txtDonation1: TEdit;
 	txtDonation2: TEdit;
 	txtDonation3: TEdit;
@@ -104,9 +111,14 @@ TLogView = class(TForm)
 	procedure menuFileClick(Sender: TObject);
 	procedure menuTestKeepAliveClick(Sender: TObject);
 	procedure menuTestSchedulerClick(Sender: TObject);
+	procedure mnuContentsClick(Sender: TObject);
+	procedure mnuWebSiteClick(Sender: TObject);
 	procedure onSocketReceive(msg: string; ip: string);
 	procedure onSocketError(msg: string);
 	procedure Timer1Timer(Sender: TObject);
+	procedure txtDonation1Change(Sender: TObject);
+	procedure txtDonation2Change(Sender: TObject);
+	procedure txtDonation3Change(Sender: TObject);
 
 public
 	procedure LogMsg(msg: string);
@@ -120,7 +132,7 @@ implementation
 
 {$R *.lfm}
 
-uses uLog, frmPreferences, uGlobals, LCLType, DateUtils, fpjson;
+uses uLog, frmPreferences, uGlobals, LCLType, DateUtils, fpjson, LCLIntf;
 
 var
    firstShow: boolean;		// you can also use form.FormState for this
@@ -152,10 +164,23 @@ begin
 	{$IfDef Darwin}
    Panel1.Font.Name := 'Lucida Grande';
 	Panel1.Font.Size := 11;
+   // on the Mac, setting ReadOnly to true also prevents the user from
+   // selecting and copying text, which we want them to be able to do.
+   // we prevent changing in the onChange event handler.
    txtDonation1.ReadOnly := false;
    txtDonation2.ReadOnly := false;
    txtDonation3.ReadOnly := false;
 	{$ENDIF}
+   
+   {$IfDef Linux}
+   txtDonation1.color := GetRGBColorResolvingParent;
+   txtDonation2.color := GetRGBColorResolvingParent;
+   txtDonation3.color := GetRGBColorResolvingParent;
+   {$EndIf}
+   
+   txtDonation1.Text := DONATION_ENS;
+   txtDonation2.Text := DONATION_ETH;
+   txtDonation3.Text := DONATION_ETC;
 end;
 
 procedure TLogView.FormShow(Sender: TObject);
@@ -227,17 +252,24 @@ begin
 	txtLog.Append(msg);
 end;
 
-procedure TLogView.menuTestKeepAliveClick(Sender: TObject);
-begin
-	//g_tests.testSynchonousKeepAlive;
-end;
-
 procedure TLogView.menuTestSchedulerClick(Sender: TObject);
 begin
-   //g_webFace.onWorkUnit('Desktop', 1, 0);
-   //g_webFace.onCloseHit('test', 77, 7, 5000000);
-	//g_webFace.onSolution('Miner1', 1, 1, 1234567);
-   //g_collector.onHashFault(TJSONArray.Create, 1, false);
+
+end;
+
+procedure TLogView.menuTestKeepAliveClick(Sender: TObject);
+begin
+
+end;
+
+procedure TLogView.mnuContentsClick(Sender: TObject);
+begin
+	OpenURL('https://github.com/mining-visualizer/Mining-Visualizer/wiki');
+end;
+
+procedure TLogView.mnuWebSiteClick(Sender: TObject);
+begin
+	OpenURL('https://github.com/mining-visualizer/Mining-Visualizer');
 end;
 
 procedure TLogView.onSocketReceive(msg: string; ip: string);
@@ -256,6 +288,21 @@ begin
       Timer1.Enabled := false;
 		g_collector.gaugeRefresh;
    end;
+end;
+
+procedure TLogView.txtDonation1Change(Sender: TObject);
+begin
+   txtDonation1.Text := DONATION_ENS;
+end;
+
+procedure TLogView.txtDonation2Change(Sender: TObject);
+begin
+   txtDonation2.Text := DONATION_ETH;
+end;
+
+procedure TLogView.txtDonation3Change(Sender: TObject);
+begin
+   txtDonation3.Text := DONATION_ETC;
 end;
 
 //  System Tray stuff

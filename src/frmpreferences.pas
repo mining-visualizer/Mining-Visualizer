@@ -50,11 +50,21 @@ type
 		actOk: TAction;
 		actions1: TActionList;
 		btnClose: TButton;
+		btnAlertTest: TButton;
+		chkAlerts: TCheckBox;
 		chkLogin: TCheckBox;
 		chkUseSSL: TCheckBox;
 		cmbFrequencyUnitWU: TComboBox;
 		cmbFrequencyUnitCH: TComboBox;
+		Label25: TLabel;
+		Label26: TLabel;
+		txtAlertAction: TEdit;
 		Label22: TLabel;
+		Label23: TLabel;
+		Label24: TLabel;
+		Shape9: TShape;
+		tabAlerts: TTabSheet;
+		txtAlertWait: TEdit;
 		txtPassword: TEdit;
 		txtCertBundle: TFileNameEdit;
 		txtPort: TEdit;
@@ -118,7 +128,9 @@ type
 		procedure actEditExecute(Sender: TObject);
 		procedure actMoveDownExecute(Sender: TObject);
 		procedure actMoveUpExecute(Sender: TObject);
+		procedure btnAlertTestClick(Sender: TObject);
 		procedure btnCloseClick(Sender: TObject);
+		procedure chkAlertsChange(Sender: TObject);
 		procedure chkLoginChange(Sender: TObject);
 		procedure chkUseSSLChange(Sender: TObject);
 		procedure cmbFrequencyUnitCHSelect(Sender: TObject);
@@ -146,19 +158,22 @@ type
       procedure setCloseHitComboItems(combo: TComboBox);
       procedure loadCloseHitValues(path: string; textbox: TEdit; combo: TComboBox);
       function newMinerID: integer;
+      function calcPageHash: string;
 
  private
-
  		m_mouseDown: boolean;
       m_minerCount: integer;
       m_sslNeedsRestart: boolean;
+      // this is not a true hash, just a mash-up of all the values on the page, giving us
+      // an easy way to detect if the user changed anything.
+      m_pageHash: string;	
       
 end;
 
 
 implementation
 
-uses ULog, fpjson, jsonparser, UGlobals, uLib, LCLType, frmMinerEdit, uMiner, uMisc;
+uses ULog, fpjson, jsonparser, UGlobals, uLib, LCLType, frmMinerEdit, uMiner, uMisc, strutils, Main;
 
 {$R *.lfm}
 
@@ -185,6 +200,7 @@ begin
    lstNavigation.AddItem('Desktop', TObject(tabDesktop));
    lstNavigation.AddItem('Web App', TObject(tabWebFace));
    lstNavigation.AddItem('Close Hits', TObject(tabCloseHits));
+   lstNavigation.AddItem('Alerts', TObject(tabAlerts));
    
    lstNavigation.ItemIndex := 0;
    
@@ -262,6 +278,13 @@ begin
    txtServerCert.Text := g_settings.getString('WebInterface.server_cert');
    txtServerKey.Text := g_settings.getString('WebInterface.server_key');
    
+   // Alerts
+   chkAlerts.Checked := g_settings.getBool('Alerts.enabled');
+   txtAlertAction.Text := g_settings.getString('Alerts.action');
+   txtAlertWait.Text := g_settings.getString('Alerts.wait');
+   txtAlertAction.Enabled := chkAlerts.Checked;
+   txtAlertWait.Enabled := chkAlerts.Checked;
+   
    // Miscellaneous
    pageLeaving := 0;
    calcDifficulty;
@@ -274,6 +297,7 @@ begin
    	Font.Size := 11;
 	{$ENDIF}
 
+   m_pageHash := calcPageHash;   
 end;
 
 procedure TPreferencesDlg.FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -313,14 +337,14 @@ begin
 	end;
 end;
 
-// this is the list box on the left hand side
+// this is the list box on the left hand side. the selected item has changed.
 procedure TPreferencesDlg.lstNavigationSelectionChange(Sender: TObject; User: boolean);
 begin
    pgsSettings.ActivePage := TTabSheet(lstNavigation.Items.Objects[lstNavigation.ItemIndex]);
    pageLeaving := lstNavigation.ItemIndex;
 end;
 
-
+// the tab sheet is going to change pages
 procedure TPreferencesDlg.pgsSettingsChanging(Sender: TObject; var AllowChange: Boolean);
 begin
    // ignore page changes while the form is being created
@@ -332,10 +356,12 @@ begin
 	end;
 end;
 
+// the tab sheet HAS changed pages
 procedure TPreferencesDlg.pgsSettingsChange(Sender: TObject);
 var
    i: integer;
 begin
+   m_pageHash := calcPageHash;
    if pgsSettings.ActivePage = tabDesktop then begin
       // configure hash rate section
       i := Ord(IndividualGPUs);
@@ -402,7 +428,7 @@ begin
             lstNavigation.ItemIndex := pageLeaving;
 		   	exit;
 			end;
-			if not isNumeric(txtWorkUnitFrequency.Text) then  begin
+			if not isNumeric(txtWorkUnitFrequency.Text) then begin
 		      txtWorkUnitFrequency.SetFocus;
 		   	Application.MessageBox('Please enter a valid numeric frequency', '', MB_ICONEXCLAMATION);
             lstNavigation.ItemIndex := pageLeaving;
@@ -410,7 +436,32 @@ begin
 			end;
 		end;
       
+      'tabAlerts': begin
+         if chkAlerts.Checked then begin
+            if Trim(txtAlertAction.Text) = '' then begin
+			   	Application.MessageBox('Please enter a valid alert action.  This can be a script, an executable program, or a URL', '', MB_ICONEXCLAMATION);
+	            lstNavigation.ItemIndex := pageLeaving;
+			   	exit;
+				end;
+            
+				if not isNumeric(txtAlertWait.Text) then begin
+			      txtAlertWait.SetFocus;
+			   	Application.MessageBox('Please enter a valid number', '', MB_ICONEXCLAMATION);
+	            lstNavigation.ItemIndex := pageLeaving;
+			   	exit;
+				end;
+
+         	// if it's not a URL, check the file exists
+            if not AnsiStartsText('http', txtAlertAction.Text) then begin
+               if not FileExists(txtAlertAction.Text) then begin
+			   		Application.MessageBox('Warning: the specified script / executable does not exists on the local file system.', '', MB_ICONEXCLAMATION);
+					end;
+				end;
+			end;
+ 		end;
+
 	end;
+   
    result := true;
 end;
 
@@ -423,13 +474,14 @@ var
    closeHitThreshold: QWord;
    miner: CMiner;
 begin
-   try
+   if calcPageHash = m_pageHash then exit;
+	try
       case pgsSettings.ActivePage.Name of 
       	'tabMiners': begin
 			   jArray := TJSONArray.Create;
 				for i := 1 to m_minerCount do begin
                miner := gridMiners.Objects[NameCol, i] as CMiner;
-		         jArray.Add(miner.AsJSON);
+		         jArray.Add(miner.AsJSONObject);
 				end;
             try
 					g_settings.beginUpdate;
@@ -499,6 +551,18 @@ begin
                Screen.Cursor := crDefault;
 				end;
 			end;
+         
+         'tabAlerts': begin
+            try
+					g_settings.beginUpdate;
+               g_settings.putValue('Alerts', 'enabled', chkAlerts.Checked);
+               g_settings.putValue('Alerts', 'action', txtAlertAction.Text);
+               g_settings.putValue('Alerts', 'wait', txtAlertWait.Text);
+				finally
+					g_settings.endUpdate;
+				end;
+			end;
+
 		end;
 
 	except
@@ -506,6 +570,48 @@ begin
 			MessageBox2(PChar('Exception in TPreferencesDlg.saveSettings : ' + e.Message), '', MB_ICONERROR);
 	end;
 end;
+
+// this is not a true hash, just a mash-up of all the values on the page, giving us
+// an easy way to detect if the user changed anything.
+function TPreferencesDlg.calcPageHash: string;
+var
+   miner: CMiner;
+   i: integer;
+   jMiner: TJSONObject;
+begin
+   result := '';
+   case pgsSettings.ActivePage.Name of
+   	'tabMiners': begin
+			for i := 1 to m_minerCount do begin
+            miner := gridMiners.Objects[NameCol, i] as CMiner;
+            jMiner := miner.AsJSONObject;
+            result += result + jMiner.AsJSON;
+            jMiner.Free;
+			end;
+         result += '|' + txtUDPListen.Text + '|' + txtUdpPassword.Text + '|';
+		end;
+
+      'tabWebFace': begin
+         result := '|' + txtPort.Text + '|' + IntToStr(integer(chkLogin.Checked)) + '|' + txtPassword.Text + '|' + IntToStr(integer(chkUseSSL.Checked)) + '|' + 
+         					txtCertBundle.Text + '|' + txtServerCert.Text + '|' + txtServerKey.Text + '|';
+		end;
+
+      'tabDesktop': begin
+         result := '|' + IntToStr(grpHashRates.ItemIndex) + '|' + IntToStr(grpTempDisplay.ItemIndex) + '|' + txtHashRateDeviation.Text + '|';
+		end;
+
+      'tabCloseHits': begin
+         result := '|' + txtFrequency.Text + '|' + IntToStr(cmbFrequencyUnitCH.ItemIndex) + '|' + txtWorkUnitFrequency.Text + '|' + 
+         					IntToStr(cmbFrequencyUnitWU.ItemIndex) + '|' + txtMinerMask.Text + '|' + IntToStr(trackScale.Position) + '|';
+		end;
+
+      'tabAlerts': begin
+         result := '|' + IntToStr(integer(chkAlerts.Checked)) + '|' + txtAlertAction.Text + '|' + txtAlertWait.Text + '|';
+		end;
+	end;
+end;
+
+
 
 
 // ==================  MINERS TAB  ====================
@@ -563,7 +669,6 @@ begin
 	end;
    result := maxID + 1;
 end;
-
 
 procedure TPreferencesDlg.actDeleteRowExecute(Sender: TObject);
 var
@@ -681,6 +786,7 @@ procedure TPreferencesDlg.btnCloseClick(Sender: TObject);
 begin
    Close;
 end;
+
 
 // ================  WEB APP TAB  ====================
 
@@ -823,6 +929,21 @@ end;
 procedure TPreferencesDlg.trackScaleMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
 	Handled := true;
+end;
+
+
+// ================  ALERTS TAB  ====================
+
+procedure TPreferencesDlg.chkAlertsChange(Sender: TObject);
+begin
+   txtAlertAction.Enabled := chkAlerts.Checked;
+   txtAlertWait.Enabled := chkAlerts.Checked;
+end;
+
+procedure TPreferencesDlg.btnAlertTestClick(Sender: TObject);
+begin
+   g_settings.putValue('Alerts', 'action', txtAlertAction.Text);
+	g_collector.doAlertAction(true);
 end;
 
 procedure TPreferencesDlg.gridMinersPrepareCanvas(sender: TObject; aCol, aRow: Integer; aState: TGridDrawState);

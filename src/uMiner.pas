@@ -50,7 +50,7 @@ CMiner = class
       function getGPUTempStatusStr: string;
       procedure setHashRates(minerRate: integer; gpuRates: TJSONArray);
       procedure setFanSpeeds(fanSpeeds: TJSONArray);
-      function AsJSON: TJSONObject;
+      function AsJSONObject: TJSONObject;
       
    private type
 		TGPUList = specialize TFPGObjectList<CGPU>;
@@ -174,7 +174,7 @@ begin
    result.hashFaultsAlert := self.hashFaultsAlert;
 end;
 
-function CMiner.AsJSON: TJSONObject;
+function CMiner.AsJSONObject: TJSONObject;
 begin
    result := TJSONObject.Create([
    				'id', id,
