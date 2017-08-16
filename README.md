@@ -4,6 +4,10 @@
 
 Mining Visualizer is a [suite of programs](#software-components) with some special features for solo miners.
 
+
+
+![](../../wiki/images/widget_miners.png)
+
 #### Solo Miners!!!  Seriously, dude ... nobody solo mines anymore!!!
 
 It's true there are not many solo miners out there.  The vast majority of hashing power is being directed to pool mining operations (currently about 94%).  If you have only 1 GPU, the average time to mine a block is currently something ridiculous like **750 days**! So if that's you, I'd recommend sticking to pool mining.  However, larger mining operations may be interested in some of the features that I've added to this program.  
