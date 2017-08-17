@@ -102,7 +102,7 @@ This software suite is made up of two programs.  The first is the program contai
 
 ### Download
 
-For the latest binaries, please visit the [Mining Visualizer Release](releases) page, and the [MVis-ethminer Release](https://github.com/mining-visualizer/MVis-ethminer/releases) page.
+For the latest binaries, please visit the [Mining Visualizer Release](https://github.com/mining-visualizer/Mining-Visualizer/releases) page, and the [MVis-ethminer Release](https://github.com/mining-visualizer/MVis-ethminer/releases) page.
 
 ### Documentation
 
