@@ -16,7 +16,6 @@ backup/
 tests/config/config.json
 tests/config/
 tests/log.txt
-ssl-certs/
 tests/unittests.fpcunit.ini
 resources/DocumentRoot/plugins/
 release.bat
