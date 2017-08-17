@@ -23,9 +23,9 @@ IF ERRORLEVEL 1 GOTO ERROR
 xcopy /i /s SSL-Certs Release\SSL-Certs
 IF ERRORLEVEL 1 GOTO ERROR
 
-del MiningVisualizer.zip
-powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('.\Release', 'MiningVisualizer.zip'); }"
-move MiningVisualizer.zip Release
+del MiningVisualizer-vxxx-win64.zip
+powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('.\Release', 'MiningVisualizer-vxxx-win64.zip'); }"
+move MiningVisualizer-vxxx-win64.zip Release
 
 popd
 @ECHO OFF
