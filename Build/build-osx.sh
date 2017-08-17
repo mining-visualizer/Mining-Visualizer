@@ -20,17 +20,17 @@ res=$?
 
 rm -r Release/MiningVisualizer.app/Contents/Resources/*
 
-cp -R WebApp Release/MiningVisualizer.app/Contents/Resources/WebApp/
+cp -R WebApp Release/MiningVisualizer.app/Contents/Resources
 res=$((res + $?))
 
-cp -R GeekTool Release/MiningVisualizer.app/Contents/Resources/GeekTool/
+cp -R GeekTool Release/MiningVisualizer.app/Contents/Resources
 res=$((res + $?))
 
-cp -R SSL-Certs Release/MiningVisualizer.app/Contents/Resources/SSL-Certs/
+cp -R SSL-Certs Release/MiningVisualizer.app/Contents/Resources
 res=$((res + $?))
 
 
-tar -czf Release/mvis.tar.gz  --directory=Release MiningVisualizer.app
+tar -czf Release/MiningVisualizer-vxxx-osx.tar.gz  --directory=Release MiningVisualizer.app
 res=$((res + $?))
 
 if [ "$res" -ge 1 ] ; then
