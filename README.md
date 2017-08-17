@@ -1,35 +1,30 @@
 # Mining-Visualizer
 
-##### Table of Contents
+### Table of Contents
 
-- [Introduction](#introduction)
-- UI Elements
-	- [Desktop Widgets](#desktop-widgets)
-	- [Web Application](#web-app)
-- [Software Components](#software-components)
-- [Platform Support](#platform-support)
-- [Download](#download)
-- [Documentation](#documentation)
-- [Build From Source](#build-from-source)
-- [Donations](#donations)
+----------
+
+[Introduction](#introduction)
+UI Elements
+&nbsp;&nbsp;&nbsp;&nbsp;[Desktop Widgets](#desktop-widgets)
+&nbsp;&nbsp;&nbsp;&nbsp;[Web Application](#web-app)
+[Software Components](#software-components)
+[Platform Support](#platform-support)
+[Download](#download)
+[Documentation](#documentation)
+[Build From Source](#build-from-source)
+[Donations](#donations)
+
+
+----------
 
 ### Introduction
 
-Mining Visualizer is a [suite of programs](#software-components) with some special features for solo miners.
-
-#### Solo Miners!!!  Seriously, dude ... nobody solo mines anymore!!!
-
-It's true there are not many solo miners out there.  The vast majority of hashing power is being directed to pool mining operations (currently about 94%).  If you have only 1 GPU, the average time to mine a block is currently something ridiculous like **750 days**! So if that's you, I'd recommend sticking to pool mining.  However, larger mining operations may be interested in some of the features that I've added to this program.  
-
-### Motivation
-
-I started solo mining myself about a year ago with 1 GPU.  As you can imagine, the biggest downside to solo mining is the **waiting**.  I would often sit there wondering, "Is the miner even doing anything?  How do I know it's still working?"  Doubts started creeping into my mind. "What if I never mine a block!"  
-
-Being a programmer, ideas started coming into my mind about ways to make the experience of solo mining a little less painful.  Here's what I came up with:
+Mining Visualizer is a [suite of programs](#software-components) supporting Ethereum mining, with some special features for solo miners.
 
 ### Desktop Widgets
 
-Mining Visualizer comes with 4 desktop widgets that display various data items that let you monitor your mining operation at a glance.  These are powered by **Rainmeter** for Windows, and **GeekTool** for the Mac.  Unfortunately there is nothing available for Linux in this category (but see below for the Web App).  Most of the items are pretty self explanatory, but I will comment on a few.
+Mining Visualizer comes with 4 desktop widgets that display various data items that let you monitor your mining operation at a glance.  These are powered by **Rainmeter** for Windows, and **GeekTool** for the Mac.  (Desktop widgets are possible under Linux using a program called Conky, but no development work has been done in this regard).  Most of the items are pretty self explanatory, but I will comment on a few.
 
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_miners.png)
 
@@ -46,7 +41,6 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 * **Target** - the upper 64 bits of the current network Target.  If your miner finds a hash value *lower* than the target, you will become the miner of the next block, and receive the appropriate reward.     
 * **Best Hash**: the upper 64 bits of the best hash found by your mining rigs, since you last mined a block. Remember, lower is better.
 
-**Note:** - I was mining on the ETC network when I took these screenshots, which has a much lower difficulty level.
 
 #### Network
 
@@ -57,7 +51,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 #### Close Hits
 
-"If mining a block is what we are all waiting for", I thought, "why not keep track of when you ***almost*** mined a block".  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as *Close Hits*. The desktop widget shows the last 5 close hits found by your mining farm, with a little accompanying bar graph. Smaller values are better.
+The idea behind *Close Hits* is to notify you when you ***almost*** mined a block.  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as close hits. The desktop widget shows the last 5 close hits found by your mining farm, with a little accompanying bar graph. Smaller values are better.
 
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_closehits.png)
 
@@ -75,7 +69,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 #### Graphs
 
 * This shows *Solutions*, *Close Hits* and *Work Units*. 
-* Work Units are the same idea as Close Hits, except with a much lower level of difficulty.  You could also compare them to 'shares' (from pool mining), except there is no reward when you find one. Their purpose is simply to give you a way to verify that your mining rigs are performing as they should.
+* Work Units are the same idea as Close Hits, except with a much lower level of difficulty.  You could also compare them to *shares* (from pool mining), except there is no reward when you find one. Their purpose is simply to give you a way to verify that your mining rigs are performing as they should.
 * Close Hits are graphed individually, whereas Work Units are grouped into 4 hour intervals and displayed as a histogram.
 
 
@@ -98,7 +92,7 @@ MVis comes with a 3 page web application to display information pertaining to yo
 
 ### Software Components
 
-This software suite is made up of two programs.  The first is the program in this repo, which I refer to as Mining Visualizer proper, or just MVis.  It is basically a relay / data collection program that communicates with the miner and drives the desktop widgets and the web application.  The second component is [the miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  I often refer to this program as *MVis-ethminer*.
+This software suite is made up of two programs.  The first is the program contained in this repo, which is often referred to as Mining Visualizer proper, or just MVis.  It is basically a relay / data collection program that communicates with the miner and drives the desktop widgets and the web application.  The second component is the actual [the miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  This is often referred to as *MVis-ethminer*.
 
 
 ### Platform support
