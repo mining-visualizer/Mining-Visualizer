@@ -4,16 +4,16 @@
 
 ----------
 
-[Introduction](#introduction)
-UI Elements
-&nbsp;&nbsp;&nbsp;&nbsp;[Desktop Widgets](#desktop-widgets)
-&nbsp;&nbsp;&nbsp;&nbsp;[Web Application](#web-app)
-[Software Components](#software-components)
-[Platform Support](#platform-support)
-[Download](#download)
-[Documentation](#documentation)
-[Build From Source](#build-from-source)
-[Donations](#donations)
+[Introduction](#introduction)  
+UI Elements  
+&nbsp;&nbsp;&nbsp;&nbsp;[Desktop Widgets](#desktop-widgets)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Web Application](#web-app)  
+[Software Components](#software-components)  
+[Platform Support](#platform-support)  
+[Download](#download)  
+[Documentation](#documentation)  
+[Build From Source](#build-from-source)  
+[Donations](#donations)  
 
 
 ----------
@@ -46,12 +46,12 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_network.gif)
 
-* **Balance** - Of course, mining a block is the **big, exciting event** that every solo miner waits for, so I wanted to make that stand out as much as possible. This line displays the current balance of your mining account.  It will cycle through one of five colors every time you mine a block to give you an easy-to-see, visual indicator of this momentous event.  You can customize the colors, or even disable it if you think it's tacky.
+* **Balance** - Of course, mining a block is the **big, exciting event** that every solo miner waits for, due of course, to the accompanying mining reward, so Mining Visualizer makes this stand out as much as possible. This line displays the current balance of your mining account.  It will cycle through one of five colors every time you mine a block to give you an easy-to-see, visual indicator of this momentous event.  You can customize the colors, or even disable it if you think it's tacky.
 
 
 #### Close Hits
 
-The idea behind *Close Hits* is to notify you when you ***almost*** mined a block.  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as close hits. The desktop widget shows the last 5 close hits found by your mining farm, with a little accompanying bar graph. Smaller values are better.
+The idea behind *Close Hits* is to notify you when you ***almost*** mined a block.  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as close hits. The desktop widget shows the last 5 close hits found by your mining farm, with an accompanying bar graph. Smaller values are better.
 
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_closehits.png)
 
