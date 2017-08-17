@@ -27,24 +27,24 @@ cp -R SSL-Certs Release/MiningVisualizer
 res=$((res + $?))
 
 
-# tar -czf Release/MiningVisualizer-vxxx-linux.tar.gz  --directory=Release MiningVisualizer
-# res=$((res + $?))
+tar -czf Release/MiningVisualizer-vxxx-linux.tar.gz  --directory=Release MiningVisualizer
+res=$((res + $?))
 
-# if [ "$res" -ge 1 ] ; then
-#    echo "."
-#    echo "."
-#    echo "."
-#    echo "ERRORS WERE ENCOUNTERED!!!"
-#    echo "."
-#    echo "."
-#    echo "."
-#    exit 1
-# fi
+if [ "$res" -ge 1 ] ; then
+   echo "."
+   echo "."
+   echo "."
+   echo "ERRORS WERE ENCOUNTERED!!!"
+   echo "."
+   echo "."
+   echo "."
+   exit 1
+fi
 
-# echo "."
-# echo "."
-# echo "."
-# echo "script completed successfully"
-# echo "."
-# echo "."
-# echo "."
+echo "."
+echo "."
+echo "."
+echo "script completed successfully"
+echo "."
+echo "."
+echo "."
