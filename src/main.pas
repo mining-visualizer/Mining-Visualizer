@@ -71,6 +71,7 @@ TLogView = class(TForm)
 	menuHelp: TMenuItem;
 	mnuWebSite: TMenuItem;
 	mnuContents: TMenuItem;
+	sleepDetector: TTimer;
 	txtDonation1: TEdit;
 	txtDonation2: TEdit;
 	txtDonation3: TEdit;
@@ -98,7 +99,7 @@ TLogView = class(TForm)
 	mnuTools: TMenuItem;
 	txtLog: TMemo;
 	procedure actExitExecute(Sender: TObject);
- procedure actPreferencesExecute(Sender: TObject);
+ 	procedure actPreferencesExecute(Sender: TObject);
 	procedure actRefreshGaugeExecute(Sender: TObject);
 	procedure actRestoreExecute(Sender: TObject);
 	procedure actStartMinimizedExecute(Sender: TObject);
@@ -115,14 +116,18 @@ TLogView = class(TForm)
 	procedure mnuWebSiteClick(Sender: TObject);
 	procedure onSocketReceive(msg: string; ip: string);
 	procedure onSocketError(msg: string);
+	procedure sleepDetectorTimer(Sender: TObject);
 	procedure Timer1Timer(Sender: TObject);
 	procedure txtDonation1Change(Sender: TObject);
 	procedure txtDonation2Change(Sender: TObject);
 	procedure txtDonation3Change(Sender: TObject);
 
-public
+//public
 	procedure LogMsg(msg: string);
 
+private
+   m_lastSleepCheck: TDateTime;
+   
 end;
 
 var
@@ -181,6 +186,8 @@ begin
    txtDonation1.Text := DONATION_ENS;
    txtDonation2.Text := DONATION_ETH;
    txtDonation3.Text := DONATION_ETC;
+   
+   m_lastSleepCheck := Now;
 end;
 
 procedure TLogView.FormShow(Sender: TObject);
@@ -282,9 +289,20 @@ begin
    LogMsg('ERR : ' + msg);
 end;
 
+procedure TLogView.sleepDetectorTimer(Sender: TObject);
+begin
+	if MillisecondsBetween(Now, m_lastSleepCheck) > sleepDetector.Interval * 10 then begin
+      g_collector.awakeFromSleep;
+	end;
+   m_lastSleepCheck := Now;
+end;
+
 procedure TLogView.Timer1Timer(Sender: TObject);
 begin
    if g_widgetData.widgetOnline then begin
+      // if MVis is configured to boot with the OS, it might start before Rainmeter/Geektool, and 
+      // the gauges might then contain garbage. so we wait until the widget utility is running
+      // and then do a gauge refresh.
       Timer1.Enabled := false;
 		g_collector.gaugeRefresh;
    end;

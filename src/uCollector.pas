@@ -36,7 +36,6 @@ const
    INTVL_POLL_OFFLINE = 10 * 1000;
    INTVL_PEER_COUNT = 20 * 1000;
    INTVL_BALANCE = 30 * 1000;
-   INTVL_ALERTS_START_DELAY = 5000;
 	
 type
 
@@ -89,7 +88,9 @@ CCollector = class(TThread)
       // used to detect when hash rates change significantly (some things need recalculation)
       m_hashRateReference: double;
       m_lastWebAlert: string;
+      // when did we start, or last awake from sleep.
       m_startedAt: TDateTime;
+      m_alertsStartDelay: integer;
 
 end;
 
@@ -118,6 +119,7 @@ begin
    m_hashRateReference := -1;
    m_lastWebAlert := '';
    m_startedAt := Now;
+   m_alertsStartDelay := 5000;
 
    // launch the worker thread straight away
 	Inherited Create(false)
@@ -171,7 +173,8 @@ begin
 	// periodic check to see if any offline miners have come online recently
    m_tasks.scheduleTask(@pollOfflineMiners, 0, INTVL_POLL_OFFLINE, true, 'pollOfflineMiners');
    
-   m_tasks.scheduleTask(@updateAlerts, 1, INTVL_ALERTS_START_DELAY + 1000, false, 'alertsStartDelay');
+   // after things have settled down, check if there are any alerts
+   m_tasks.scheduleTask(@updateAlerts, 0, m_alertsStartDelay + 1000, false, 'alertsStartDelay');
 
    widgetHeartBeat(0);
    m_tasks.scheduleTask(@widgetHeartBeat, 0, 10 * 1000, true, 'widgetHeartBeat');
@@ -185,22 +188,6 @@ begin
 	end;
 
    Log.Writeln(['CCollector worker thread exiting'], true);
-end;
-
-
-procedure CCollector.awakeFromSleep;
-var
-   i: integer;
-begin
-   Log.Writeln(['Trace: CCollector.awakeFromSleep'], true);
-   // set everybody offline
-   m_nodeLiaison := -1;
-   for i := 0 to g_miners.count - 1 do
-      g_miners.byRow[i].online := false;
-   
-   sleep(5000);
- 	pollOfflineMiners(0);
-   m_tasks.scheduleTask(@delayedStartTasks, Ord(SleepAwake), INTVL_DELAYED_START, false, 'awake:delayedStartTasks');
 end;
 
 
@@ -220,6 +207,17 @@ begin
       logView.LogMsg('Waiting for miners ...');
    gaugeRefresh;
    
+end;
+
+
+procedure CCollector.awakeFromSleep;
+begin
+   m_startedAt := Now;
+   // things take longer to settle down after a 'wake from sleep'.
+   m_alertsStartDelay := 20 * 1000;
+   // after things have settled down, check if there are any alerts
+   m_tasks.scheduleTask(@updateAlerts, 0, m_alertsStartDelay + 1000, false, 'alertsStartDelay');
+   Log.Writeln(['Mining Visualizer has detected a wake from sleep event']);
 end;
 
 
@@ -802,11 +800,11 @@ var
 begin
    jAlerts := CheckAlerts;
    s := jAlerts.AsJSON;
-   // at startup we want to avoid flashing alerts until all miners have reported in and things have 
-   // stabilized somewhat.  there's a delayed start task scheduled at startup slightly after 
-   // INTVL_ALERTS_START_DELAY to make sure we send out the necessary alerts at that time in case there's
-   // a lull in activity right then.
-   if (s <> m_lastWebAlert) and (MillisecondsBetween(Now, m_startedAt) > INTVL_ALERTS_START_DELAY) then begin
+   // at startup, or after we awake from sleep, we want to avoid flashing alerts until all miners 
+   // have reported in and things have stabilized somewhat.  there's a delayed start task scheduled 
+   // at startup slightly after m_alertsStartDelay to make sure we send out the necessary
+   // alerts at that time in case there's a lull in activity right then.
+   if (s <> m_lastWebAlert) and (MillisecondsBetween(Now, m_startedAt) > m_alertsStartDelay) then begin
       if jAlerts['MasterAlert'].AsBoolean then
       	alertUser;
       g_webFace.updateAlerts(jAlerts); // jAlerts is freed in the g_webFace.updateAlerts call chain

@@ -4490,4 +4490,10 @@ object LogView: TLogView
     left = 307
     top = 140
   end
+  object sleepDetector: TTimer
+    Interval = 400
+    OnTimer = sleepDetectorTimer
+    left = 380
+    top = 140
+  end
 end
