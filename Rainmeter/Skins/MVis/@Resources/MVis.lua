@@ -6,7 +6,7 @@ end
 
 function Update()
 
-	local BLOCK_TIME_ALERT = 120
+	local BLOCK_TIME_ALERT = 180
 
 	if SELF:GetName() == "Measure_BlockTimeCounter" then
 		-- read the value of Measure_BlockTime and display it as minutes:seconds.  after 120 seconds, turn the 
