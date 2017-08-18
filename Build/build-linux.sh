@@ -2,18 +2,18 @@
 
 cd ..
 
-# lazbuild --build-all --build-mode=Release MiningVisualizer.lpi
+lazbuild --build-all --build-mode=Release MiningVisualizer.lpi
 
-# if [ $? -ge 1 ] ; then
-#    echo "."
-#    echo "."
-#    echo "."
-#    echo "compilation error"
-#    echo "."
-#    echo "."
-#    echo "."
-#    exit 1
-# fi
+if [ $? -ge 1 ] ; then
+   echo "."
+   echo "."
+   echo "."
+   echo "compilation error"
+   echo "."
+   echo "."
+   echo "."
+   exit 1
+fi
 
 rm -r Release/MiningVisualizer/*
 
