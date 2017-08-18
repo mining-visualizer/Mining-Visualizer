@@ -296,6 +296,7 @@ var
    process: TProcess;
    res: TStringlist;
 begin
+{$IFDEF Darwin}
    process := TProcess.Create(nil);
 	process.Executable := 'osascript';
    process.Parameters.Add(ConcatPaths([getResourcesFolder, 'GeekTool', 'is_geektool_running.scpt']));
@@ -306,6 +307,9 @@ begin
    result := (res.Count > 0) and (res[0] = 'Yes');
 	res.Free;
    process.Free;
+{$ELSE}
+	result := true;
+{$ENDIF}
 end;
 
 procedure CWidget.refreshGeeklet(name: string);

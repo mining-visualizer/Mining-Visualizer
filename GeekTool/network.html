@@ -56,6 +56,8 @@
 
 <script>
 
+	const BLOCK_TIME_ALERT = 120;
+
 	var solutionCount = __SolutionCount__;
 	var blockOverdue = false;
 	var blockTimeMs = null;
@@ -91,7 +93,7 @@
 			document.getElementById("BlockTimeCounter").textContent = sMins + ':' + sSecs;
 
 			// check if over the time limit
-			if (!blockOverdue && (blockTimeMs > (120 * 1000))) 
+			if (!blockOverdue && (blockTimeMs > (BLOCK_TIME_ALERT * 1000))) 
 			{
 				document.getElementById("BlockTimeLabel").className += " Overdue";
 				document.getElementById("BlockTimeCounter").className += " Overdue";

@@ -37,7 +37,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_activity.png)
 
 * **Last Solution** - the last time you mined a block
-* **Next Solution** - an estimate of when you will mine your next block, based on your current hash rate and the network difficulty. Remember,  though, there is no guarantee that you will mine a block by this time.  The generation of hashes (mining) is a completely random process.  It is like rolling a dice.  Variance will affect your mining results.  Sometimes you will mine a block sooner,  sometimes later.
+* **Next Solution** - an estimate of when you will mine your next block, based on your current hash rate and the network difficulty. Remember,  though, there is no guarantee that you will mine a block by this time.  The computation of hashes (mining) is a completely random process.  It is like rolling a dice.  Variance will affect your mining results.  Sometimes you will mine a block sooner,  sometimes later.
 * **Target** - the upper 64 bits of the current network Target.  If your miner finds a hash value *lower* than the target, you will become the miner of the next block, and receive the appropriate reward.     
 * **Best Hash**: the upper 64 bits of the best hash found by your mining rigs, since you last mined a block. Remember, lower is better.
 
@@ -110,6 +110,7 @@ Full documentation is available in the [wiki](https://github.com/mining-visualiz
 
 ### Build From Source
 
+* Clone the repository.
 * Download and install [Lazarus Pascal](https://www.lazarus-ide.org).
 * Launch the Lazarus Pascal IDE and use it to open `MiningVisualizer.lpi`.
 * Select *Run / Compile* from the menu.

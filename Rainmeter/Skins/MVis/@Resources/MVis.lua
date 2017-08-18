@@ -6,8 +6,10 @@ end
 
 function Update()
 
+	local BLOCK_TIME_ALERT = 120
+
 	if SELF:GetName() == "Measure_BlockTimeCounter" then
-		-- read the value of Measure_BlockTime and display it as minutes:seconds.  after 180 seconds, turn the 
+		-- read the value of Measure_BlockTime and display it as minutes:seconds.  after 120 seconds, turn the 
 		-- display red.
 		local measure = SKIN:GetMeasure('Measure_BlockTime')
 		local s = measure:GetStringValue()
@@ -16,7 +18,7 @@ function Update()
 		end
 		local d = ParseDate(s)
 		seconds = os.time() - d
-		if seconds < 120 then
+		if seconds < BLOCK_TIME_ALERT then
 			SKIN:Bang('!SetOption', 'Meter_BlockTimeLabel', 'MeterStyle', 'BodyStyle')
 			SKIN:Bang('!SetOption', 'Meter_BlockTimeValue', 'MeterStyle', 'BodyStyle')
 		else
