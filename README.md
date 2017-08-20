@@ -5,10 +5,10 @@
 ----------
 
 [Introduction](#introduction)  
+[Software Components](#software-components)  
 UI Elements  
 &nbsp;&nbsp;&nbsp;&nbsp;[Desktop Widgets](#desktop-widgets)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Web Application](#web-app)  
-[Software Components](#software-components)  
 [Platform Support](#platform-support)  
 [Download](#download)  
 [Documentation](#documentation)  
@@ -21,6 +21,10 @@ UI Elements
 ### Introduction
 
 Mining Visualizer is a [suite of programs](#software-components) supporting Ethereum mining, with some special features for solo miners.  Pool mining is currently not supported.
+
+### Software Components
+
+This software suite is made up of two programs.  The first is the program contained in this repository, which is referred to as Mining Visualizer proper, or just MVis.  It is a data collection / relay program written in Pascal that communicates with the miner and drives the desktop widgets and the web application.  The second component is the [actual miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  This is often referred to as *MVis-ethminer*.
 
 ### Desktop Widgets
 
@@ -89,10 +93,6 @@ MVis comes with a 3 page web application to display information pertaining to yo
 
 
 <br>
-
-### Software Components
-
-This software suite is made up of two programs.  The first is the program contained in this repo, which is often referred to as Mining Visualizer proper, or just MVis.  It is basically a relay / data collection program written in Pascal that communicates with the miner and drives the desktop widgets and the web application.  The second component is the [actual miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  This is often referred to as *MVis-ethminer*.
 
 
 ### Platform support
