@@ -20,7 +20,7 @@ UI Elements
 
 ### Introduction
 
-Mining Visualizer is a [suite of programs](#software-components) supporting Ethereum mining, with some special features for solo miners.  Pool mining is currently not supported.
+Mining Visualizer is a suite of programs supporting Ethereum mining, with some special features for solo miners.  Pool mining is currently not supported.
 
 ### Software Components
 
