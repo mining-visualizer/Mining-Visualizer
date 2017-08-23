@@ -26,6 +26,12 @@ Mining Visualizer is a suite of programs supporting Ethereum mining, with some s
 
 This software suite is made up of two programs.  The first is the program contained in this repository, which is referred to as Mining Visualizer proper, or just MVis.  It is a data collection / relay program written in Pascal that communicates with the miner and drives the desktop widgets and the web application.  The second component is the [actual miner](https://github.com/mining-visualizer/MVis-ethminer), which is a fork of Genoil's ethminer.  This is often referred to as *MVis-ethminer*.
 
+### Solo Mining???
+
+Of course, solo mining is not for everyone.  It is generally only feasible for larger mining operations.  For instance, if you only have 1 GPU, at the current level of difficulty, the average time to mine a block is somewhere around **750 days**!  If that's you, you're best to stick with pool mining.
+
+Larger mining operations, though, should definitely consider it.  There's no mining fees, it helps to make the network more decentralized and secure, and you get the pride of mining your own blocks!
+
 ### Desktop Widgets
 
 Mining Visualizer comes with 4 desktop widgets that display various data items that let you monitor your mining operation at a glance.  These are powered by **Rainmeter** for Windows, and **GeekTool** for the Mac.  (Desktop widgets are possible under Linux using a program called Conky, but no development work has been done in this regard).  Most of the items are pretty self explanatory, but I will comment on a few.
