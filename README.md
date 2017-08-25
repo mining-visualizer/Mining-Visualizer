@@ -63,9 +63,7 @@ Mining Visualizer comes with 4 desktop widgets that display various data items t
 
 #### Close Hits
 
-The idea behind *Close Hits* is to record instances where you ***almost*** mined a block.  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as close hits. The desktop widget shows the last 5 close hits found by your mining farm, with an accompanying bar graph.  Close hits are also displayed in the Web App graph page. Smaller values are better.
-
-For me personally as a solo miner, this feature really helps to keep me engaged and hopeful as I wait for the next mined block.
+The idea behind *Close Hits* is to record instances where you ***almost*** mined a block.  The miner keeps track of hashes computed that are within a certain range of the Target value, and reports them as close hits. The desktop widget shows the last 5 close hits found by your mining farm, with an accompanying bar graph.  Close hits are also displayed in the Web App graph page. Smaller values are better.  For me personally as a solo miner, this feature really helps to keep me engaged and hopeful as I wait for the next mined block.
 
 ![](https://github.com/mining-visualizer/Mining-Visualizer/wiki/images/widget_closehits.png)
 
